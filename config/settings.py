@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 """
-Django settings for django_template_project.
+Django settings for availability_api.
 
 Environmental variables triggered in project's env_avl/bin/activate, when using runserver,
   or env_avl/bin/activate_this.py, when using apache via passenger.

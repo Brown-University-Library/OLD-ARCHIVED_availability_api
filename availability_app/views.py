@@ -13,5 +13,6 @@ log = logging.getLogger(__name__)
 
 def hi( request ):
     """ Returns simplest response. """
+    log.debug( 'starting hi()' )
     now = datetime.datetime.now()
-    return HttpResponse( '<p>hi</p> <p>( %s )</p>' % now )
+    return HttpResponse( '<p>hi</p> <p>( {} )</p>'.format(unicode(now)) )
