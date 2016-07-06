@@ -19,6 +19,7 @@ def hi( request ):
 
 
 def handler( request, id_type, id_value ):
-    log.debug( 'id_type, `{}`; id_value, `{}`'.format(id_type, id_value) )
+    params = request.GET
+    log.debug( 'id_type, `{}`; id_value, `{}`; get, `{}`'.format(id_type, id_value, pprint.pformat(params)) )
     now = datetime.datetime.now()
     return HttpResponse( '<p>hi</p> <p>( {} )</p>'.format(unicode(now)) )
