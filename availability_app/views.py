@@ -16,3 +16,9 @@ def hi( request ):
     log.debug( 'starting hi()' )
     now = datetime.datetime.now()
     return HttpResponse( '<p>hi</p> <p>( {} )</p>'.format(unicode(now)) )
+
+
+def handler( request, id_type, id_value ):
+    log.debug( 'id_type, `{}`; id_value, `{}`'.format(id_type, id_value) )
+    now = datetime.datetime.now()
+    return HttpResponse( '<p>hi</p> <p>( {} )</p>'.format(unicode(now)) )
