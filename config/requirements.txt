@@ -2,3 +2,6 @@ Django==1.9.7
 PyMySQL==0.7.4
 requests==2.10.0
 shellvars-py==0.1.2
+
+#local fork of PyZ3950 version 2.04 ## todo: add version to grab
+git+https://github.com/Brown-University-Library/PyZ3950.git
