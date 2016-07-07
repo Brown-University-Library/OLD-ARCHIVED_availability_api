@@ -137,6 +137,8 @@ class Searcher( object ):
         for result in resultset:
             ## start w/marc
             log.debug( 'type(result), `{}`'.format(type(result)) )
+            log.debug( 'result, `{}`'.format(repr(result)) )
+            log.debug( 'result.data, ```{}```'.format(pprint.pformat(result.data)) )
             try:
                 marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
                 log.debug( 'marc_record_object obtained' )
