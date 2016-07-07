@@ -28,7 +28,8 @@ class Searcher( object ):
         self.connection = self.connect()   if connect_flag   else None  # allows Searcher to be instantiated w/o connecting
 
     def connect( self ):
-        """ Connects to z3950 server. """
+        """ Connects to z3950 server.
+            Called by __init__() """
         conn = zoom.Connection(
             self.HOST,
             int(self.PORT),
@@ -39,16 +40,19 @@ class Searcher( object ):
         return conn
 
     def close_connection( self ):
+        """ Closes connection.
+            Called by search() Exception. """
         self.logger.debug( u'in z3950_wrapper.Searcher.close_connection(); closing connection.')
         self.connection.close()
 
     def search( self, key, value, marc_flag=False ):
-        """ Convenience function. """
+        """ Convenience function.
+            Called by utils.app_helper.HandlerHelper.query_josiah() """
         try:
             qstring = self.build_qstring( key, value )
             qobject = self.build_qobject( qstring )
             resultset = self.connection.search( qobject )
-            # self.inspect_resultset( resultset )
+            self.inspect_resultset( resultset )
             item_list = self.process_resultset( resultset, marc_flag )  # marc_flag typically False
             return item_list
         except Exception as e:
@@ -57,6 +61,8 @@ class Searcher( object ):
             self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
 
     def build_qstring( self, key, value ):
+        """ Builds an arcane querystring, like `@attr 1=7 9780521593700`.
+            Called by search() """
         if key == u'bib':
             key = u'id'
         dct = {
@@ -71,7 +77,8 @@ class Searcher( object ):
 
     def update_oclc_value( self, value ):
         """ Updates oclc number to brown-formatted number if necessary.
-            Reference: http://www.oclc.org/batchprocessing/controlnumber.htm """
+            Reference: http://www.oclc.org/batchprocessing/controlnumber.htm
+            Called by build_qstring() """
         if not ( value.startswith(u'ocn') or value.startswith(u'ocm') ):
             try:
                 int_value = int(value)
@@ -85,6 +92,8 @@ class Searcher( object ):
         return value
 
     def build_qobject( self, qstring ):
+        """ Builds and returns a PyZ3950.zoom.Query instance object.
+            Called by search() """
         qobject = zoom.Query(
             u'PQF'.encode(u'utf-8'),
             qstring.encode(u'utf-8')
@@ -94,6 +103,8 @@ class Searcher( object ):
         return qobject
 
     def inspect_resultset( self, resultset ):
+        """ Logs wildly detailed info about resultset.
+            Called by search() when debugging, developing. """
         self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(resultset), `%s`' % pprint.pformat(resultset) )
         self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(dir(resultset)), `%s`' % pprint.pformat(dir(resultset)) )
         self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(resultset.__dict__), `%s`' % pprint.pformat(resultset.__dict__) )
@@ -120,11 +131,17 @@ class Searcher( object ):
         return
 
     def process_resultset( self, resultset, marc_flag=False ):
-        """ Iterates through resultset, extracting from marc-data and holdings-data. """
+        """ Iterates through resultset, extracting from marc-data and holdings-data.
+            Called by search() """
         item_list = []
         for result in resultset:
             ## start w/marc
-            marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
+            log.debug( 'type(result), `{}`'.format(type(result)) )
+            try:
+                marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
+                log.debug( 'marc_record_object obtained' )
+            except Exception as e:
+                log.warning( 'could not get a marc_record_object, Exception, {}'.format(unicode(repr(e))) )
             item_entry = self.process_marc_data( marc_record_object, marc_flag )
             ## add holdings
             holdings_record_data = result.data.holdingsData
@@ -134,6 +151,8 @@ class Searcher( object ):
         return item_list
 
     def process_holdings_data( self, holdings_data ):
+        """ Pulls out callnumber, location, and public_note.
+            Called by process_resultset() """
         record_holdings_data = []
         for holdings_entry in holdings_data:
             entry = {}
@@ -146,6 +165,8 @@ class Searcher( object ):
         return record_holdings_data
 
     def process_marc_data( self, marc_record_object, marc_flag ):
+        """ Hmnn....
+            Called by process_resultset() """
         marc_dict = marc_record_object.as_dict()
         item_entry = {}
         if marc_flag:
@@ -190,7 +211,8 @@ class Searcher( object ):
                 itype=item[u't'].strip()
                 )
             return_items_data.append( self.interpret_itemsdict(items_dict, marc_record_object) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.make_items_data(); return_items_data, `%s`' % return_items_data )
+        # self.logger.debug( u'in z3950_wrapper.Searcher.make_items_data(); return_items_data, `%s`' % return_items_data )
+        log.debug( u'in z3950_wrapper.Searcher.make_items_data(); return_items_data, ```{}```'.format(pprint.pformat(return_items_data)) )
         return return_items_data
 
     def make_945_barcode( self, item ):
