@@ -15,13 +15,16 @@ from PyZ3950 import zoom  # fork, git+https://github.com/Brown-University-Librar
 from pymarc import Record  # pymarc==3.0.2
 
 
+log = logging.getLogger(__name__)
+
+
 class Searcher( object ):
 
-    def __init__( self, HOST, PORT, DB_NAME, logger, connect_flag=False ):
+    def __init__( self, HOST, PORT, DB_NAME, connect_flag=False ):
         self.HOST = HOST   if type(HOST) == unicode   else HOST.decode(u'utf-8')
         self.PORT = PORT   if type(PORT) == unicode   else PORT.decode(u'utf-8')
         self.DB_NAME = DB_NAME   if type(DB_NAME) == unicode   else DB_NAME.decode(u'utf-8')
-        self.logger = logger
+        self.logger = log
         self.connection = self.connect()   if connect_flag   else None  # allows Searcher to be instantiated w/o connecting
 
     def connect( self ):
