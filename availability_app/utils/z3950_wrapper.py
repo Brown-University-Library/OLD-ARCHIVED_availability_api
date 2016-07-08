@@ -105,29 +105,36 @@ class Searcher( object ):
     def inspect_resultset( self, resultset ):
         """ Logs wildly detailed info about resultset.
             Called by search() when debugging, developing. """
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(resultset), `%s`' % pprint.pformat(resultset) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(dir(resultset)), `%s`' % pprint.pformat(dir(resultset)) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(resultset.__dict__), `%s`' % pprint.pformat(resultset.__dict__) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(len(resultset)), `%s`' % pprint.pformat(len(resultset)) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(resultset[0]), `%s`' % pprint.pformat(resultset[0]) )
-        rec = resultset[0]
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(dir(rec)), `%s`' % pprint.pformat(dir(rec)) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.__dict__), `%s`' % pprint.pformat(rec.__dict__) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data), `%s`' % pprint.pformat(rec.data) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data.bibliographicRecord), `%s`' % pprint.pformat(rec.data.bibliographicRecord) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data.bibliographicRecord.encoding), `%s`' % pprint.pformat(rec.data.bibliographicRecord.encoding) )
-        ## marc
-        pm_rec = Record( data=rec.data.bibliographicRecord.encoding[1] )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(pm_rec), `%s`' % pprint.pformat(pm_rec) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(dir(pm_rec)), `%s`' % pprint.pformat(dir(pm_rec)) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(pm_rec.__dict__), `%s`' % pprint.pformat(pm_rec.__dict__) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(pm_rec.as_dict()), `%s`' % pprint.pformat(pm_rec.as_dict()) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(pm_rec.title()), `%s`' % pprint.pformat(pm_rec.title()) )
-        ## holdings
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data.holdingsData), `%s`' % pprint.pformat(rec.data.holdingsData) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data.holdingsData[0]), `%s`' % pprint.pformat(rec.data.holdingsData[0]) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data.holdingsData[0][0]), `%s`' % pprint.pformat(rec.data.holdingsData[0][0]) )
-        self.logger.debug( u'in z3950_wrapper.Searcher.inspect_resultset, pprint.pformat(rec.data.holdingsData[0][1].callNumber, `%s`' % pprint.pformat(rec.data.holdingsData[0][1].callNumber) )
+        self.logger.debug( 'resultset, `%s`' % pprint.pformat(resultset) )
+        self.logger.debug( 'dir(resultset), `%s`' % pprint.pformat(dir(resultset)) )
+        self.logger.debug( 'resultset.__dict__, `%s`' % pprint.pformat(resultset.__dict__) )
+        self.logger.debug( 'len(resultset), `%s`' % pprint.pformat(len(resultset)) )
+        self.logger.debug( 'resultset[0], `%s`' % pprint.pformat(resultset[0]) )
+        for (i, rec) in enumerate(resultset):
+            log.debug( 'counter, `{}`'.format(i) )
+            try:
+                self.logger.debug( 'dir(rec), `%s`' % pprint.pformat(dir(rec)) )
+                self.logger.debug( 'rec.__dict__, `%s`' % pprint.pformat(rec.__dict__) )
+                self.logger.debug( 'rec.data, `%s`' % pprint.pformat(rec.data) )
+                try:
+                    ## bib info
+                    self.logger.debug( 'rec.data.bibliographicRecord, `%s`' % pprint.pformat(rec.data.bibliographicRecord) )
+                    self.logger.debug( 'rec.data.bibliographicRecord.encoding, `%s`' % pprint.pformat(rec.data.bibliographicRecord.encoding) )
+                    pm_rec = Record( data=rec.data.bibliographicRecord.encoding[1] )
+                    self.logger.debug( 'pm_rec, `%s`' % pprint.pformat(pm_rec) )
+                    self.logger.debug( 'dir(pm_rec), `%s`' % pprint.pformat(dir(pm_rec)) )
+                    self.logger.debug( 'pm_rec.__dict__, `%s`' % pprint.pformat(pm_rec.__dict__) )
+                    self.logger.debug( 'pm_rec.as_dict(), `%s`' % pprint.pformat(pm_rec.as_dict()) )
+                    self.logger.debug( 'pm_rec.title(), `%s`' % pprint.pformat(pm_rec.title()) )
+                except:
+                    log.debug( 'no `rec.data.bibliographicRecord`' )
+                ## holdings
+                self.logger.debug( 'rec.data.holdingsData, `%s`' % pprint.pformat(rec.data.holdingsData) )
+                self.logger.debug( 'rec.data.holdingsData[0], `%s`' % pprint.pformat(rec.data.holdingsData[0]) )
+                self.logger.debug( 'rec.data.holdingsData[0][0], `%s`' % pprint.pformat(rec.data.holdingsData[0][0]) )
+                self.logger.debug( 'rec.data.holdingsData[0][1].callNumber, `%s`' % pprint.pformat(rec.data.holdingsData[0][1].callNumber) )
+            except Exception as e:
+                log.debug( 'inspection exception, `{}`'.format(unicode(repr(e))) )
         return
 
     def process_resultset( self, resultset, marc_flag=False ):
