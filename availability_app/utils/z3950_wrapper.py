@@ -110,29 +110,41 @@ class Searcher( object ):
         self.logger.debug( 'resultset.__dict__, `%s`' % pprint.pformat(resultset.__dict__) )
         self.logger.debug( 'len(resultset), `%s`' % pprint.pformat(len(resultset)) )
         self.logger.debug( 'resultset[0], `%s`' % pprint.pformat(resultset[0]) )
-        for (i, rec) in enumerate(resultset):
+        for (i, entry) in enumerate(resultset):
             log.debug( 'counter, `{}`'.format(i) )
             try:
-                self.logger.debug( 'dir(rec), `%s`' % pprint.pformat(dir(rec)) )
-                self.logger.debug( 'rec.__dict__, `%s`' % pprint.pformat(rec.__dict__) )
-                self.logger.debug( 'rec.data, `%s`' % pprint.pformat(rec.data) )
+                log.debug( 'type(entry), `{}`'.format(type(entry)) )
+                self.logger.debug( 'dir(entry), `%s`' % pprint.pformat(dir(entry)) )
+                self.logger.debug( 'entry.__dict__, `%s`' % pprint.pformat(entry.__dict__) )
+                self.logger.debug( 'entry.data, `%s`' % pprint.pformat(entry.data) )
                 try:
                     ## bib info
-                    self.logger.debug( 'rec.data.bibliographicRecord, `%s`' % pprint.pformat(rec.data.bibliographicRecord) )
-                    self.logger.debug( 'rec.data.bibliographicRecord.encoding, `%s`' % pprint.pformat(rec.data.bibliographicRecord.encoding) )
-                    pm_rec = Record( data=rec.data.bibliographicRecord.encoding[1] )
-                    self.logger.debug( 'pm_rec, `%s`' % pprint.pformat(pm_rec) )
-                    self.logger.debug( 'dir(pm_rec), `%s`' % pprint.pformat(dir(pm_rec)) )
-                    self.logger.debug( 'pm_rec.__dict__, `%s`' % pprint.pformat(pm_rec.__dict__) )
-                    self.logger.debug( 'pm_rec.as_dict(), `%s`' % pprint.pformat(pm_rec.as_dict()) )
-                    self.logger.debug( 'pm_rec.title(), `%s`' % pprint.pformat(pm_rec.title()) )
+                    self.logger.debug( 'entry.data.bibliographicRecord, `%s`' % pprint.pformat(entry.data.bibliographicRecord) )
+                    self.logger.debug( 'entry.data.bibliographicRecord.encoding, `%s`' % pprint.pformat(entry.data.bibliographicRecord.encoding) )
+                    record_instance = Record( data=entry.data.bibliographicRecord.encoding[1] )
+                    self.logger.debug( 'record_instance, `%s`' % pprint.pformat(record_instance) )
+                    self.logger.debug( 'dir(record_instance), `%s`' % pprint.pformat(dir(record_instance)) )
+                    self.logger.debug( 'record_instance.__dict__, `%s`' % pprint.pformat(record_instance.__dict__) )
+                    self.logger.debug( 'record_instance.as_dict(), `%s`' % pprint.pformat(record_instance.as_dict()) )
+                    self.logger.debug( 'record_instance.title(), `%s`' % pprint.pformat(record_instance.title()) )
                 except:
-                    log.debug( 'no `rec.data.bibliographicRecord`' )
-                ## holdings
-                self.logger.debug( 'rec.data.holdingsData, `%s`' % pprint.pformat(rec.data.holdingsData) )
-                self.logger.debug( 'rec.data.holdingsData[0], `%s`' % pprint.pformat(rec.data.holdingsData[0]) )
-                self.logger.debug( 'rec.data.holdingsData[0][0], `%s`' % pprint.pformat(rec.data.holdingsData[0][0]) )
-                self.logger.debug( 'rec.data.holdingsData[0][1].callNumber, `%s`' % pprint.pformat(rec.data.holdingsData[0][1].callNumber) )
+                    log.debug( 'no `entry.data.bibliographicRecord`' )
+                try:
+                    ## holdings
+                    self.logger.debug( 'entry.data.holdingsData, `%s`' % pprint.pformat(entry.data.holdingsData) )
+                    self.logger.debug( 'entry.data.holdingsData[0], `%s`' % pprint.pformat(entry.data.holdingsData[0]) )
+                    self.logger.debug( 'entry.data.holdingsData[0][0], `%s`' % pprint.pformat(entry.data.holdingsData[0][0]) )
+                    self.logger.debug( 'entry.data.holdingsData[0][1].callNumber, `%s`' % pprint.pformat(entry.data.holdingsData[0][1].callNumber) )
+                except:
+                    log.debug( 'no `entry.data.holdingsData`' )
+                    try:
+                        record_instance_2 = Record( data=entry.data )
+                        log.debug( 'record_instance_2.__dict__, ```{}```'.format(pprint.pformat(record_instance_2.__dict__)) )
+                        log.debug( 'record_instance_2.as_dict(), ```{}```'.format(pprint.pformat(record_instance_2.as_dict())) )
+                    except Exception as e:
+                        log.debug( 'record_instance_2 instantiation exception, `{}`'.format(unicode(repr(e))) )
+                    log.debug( 'type(record_instance_2), `{}`'.format(type(record_instance_2)) )
+                    # log.debug( '' )
             except Exception as e:
                 log.debug( 'inspection exception, `{}`'.format(unicode(repr(e))) )
         return
