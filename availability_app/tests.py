@@ -38,7 +38,7 @@ class UrlTest( TestCase ):
     # end class UrlTest()
 
 
-class IsbnTest( TestCase ):
+class IsbnUrlTest( TestCase ):
     """ Checks isbn urls. """
 
     def test_found_isbn_1(self):
@@ -49,12 +49,24 @@ class IsbnTest( TestCase ):
         self.assertTrue( '"bibid": ".b27679275"' in content )
         self.assertTrue( 'Zen and the art of motorcycle maintenance' in content )
 
+    def test_no_duplicate_bibs(self):
+        """ Checks handling when duplicate are returned by the z39.50 search. """
+        response = self.client.get( '/v2/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_02) )  # project root part of url is assumed
+        response_dct = json.loads( response.content )
+        bib_list = []
+        for entry in response_dct['response']['backend_response']:
+            log.debug( 'current bibid, `{}`'.format(entry['bibid']) )
+            self.assertEqual( False, entry['bibid'] in bib_list )
+            bib_list.append( entry['bibid'] )
+            log.debug( 'bib_list is now, ```{}```'.format(pprint.pformat(bib_list)) )
+
     def test_found_isbn_2(self):
         """ Checks found isbn that was problematic in old api'. """
         response = self.client.get( '/v2/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_02) )  # project root part of url is assumed
         content = response.content.decode('utf-8')
-        log.debug( 'content, ```{}```'.format(pprint.pformat(content)) )
-        self.assertTrue( 'foo' in content )
+        self.assertTrue( '"bibid": ".b28149300"' in content )
+        self.assertTrue( '"bibid": ".b26968939"' in content )
+        self.assertTrue( 'Africa and Africans' in content )
+        self.assertTrue( 'The Kongolese Saint Anthony' in content )
 
-
-    # end class IsbnTest
+    # end class IsbnUrlTest

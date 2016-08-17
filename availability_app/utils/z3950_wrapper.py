@@ -52,7 +52,7 @@ class Searcher( object ):
             qstring = self.build_qstring( key, value )
             qobject = self.build_qobject( qstring )
             resultset = self.connection.search( qobject )
-            self.inspect_resultset( resultset )
+            # self.inspect_resultset( resultset )  # for debugging
             item_list = self.process_resultset( resultset, marc_flag )  # marc_flag typically False
             return item_list
         except Exception as e:
@@ -163,14 +163,28 @@ class Searcher( object ):
                 log.debug( 'marc_record_object obtained' )
             except Exception as e:
                 log.warning( 'could not get a marc_record_object, Exception, {}'.format(unicode(repr(e))) )
+                continue
             item_entry = self.process_marc_data( marc_record_object, marc_flag )
             ## add holdings
             try:
                 holdings_record_data = result.data.holdingsData
+                item_entry['holdings_data'] = self.process_holdings_data( holdings_record_data )
             except Exception as e:
                 log.warning( 'error trying to read holdings data, ```{}```'.format(unicode(repr(e))) )
-            item_entry[u'holdings_data'] = self.process_holdings_data( holdings_record_data )
-            item_list.append( item_entry )
+                item_entry['holdings_data'] = []
+            ## update main list
+            if item_list == []:
+                item_list.append( item_entry )
+            else:
+                add_flag = True
+                for existing_entry in item_list:
+                    existing_bib = existing_entry['bibid']
+                    if item_entry['bibid'] == existing_bib:
+                        add_flag = False
+                        break
+                if add_flag == True:
+                    item_list.append( item_entry )
+
         self.logger.debug( u'in z3950_wrapper.Searcher.process_resultset, pprint.pformat(item_list), `%s`' % pprint.pformat(item_list) )
         return item_list
 
@@ -189,7 +203,7 @@ class Searcher( object ):
         return record_holdings_data
 
     def process_marc_data( self, marc_record_object, marc_flag ):
-        """ Hmnn....
+        """ Creates bib-dct.
             Called by process_resultset() """
         marc_dict = marc_record_object.as_dict()
         item_entry = {}
@@ -223,7 +237,8 @@ class Searcher( object ):
 
     def make_items_data( self, marc_record_object ):
         """ Processes each item's 945 field for:
-              barcode, callnumber, item_id, itype, location, & status """
+              barcode, callnumber, item_id, itype, location, & status
+            Called by process_marc_data() """
         items = marc_record_object.get_fields(u'945') or []
         return_items_data = []
         for item in items:
