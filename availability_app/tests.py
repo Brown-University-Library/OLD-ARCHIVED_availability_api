@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-import logging, pprint
+import json, logging, pprint
 from availability_app import settings_app
 from django.test import TestCase
 
@@ -28,6 +28,12 @@ class UrlTest( TestCase ):
         self.assertEqual( 302, response.status_code )  # permanent redirect
         redirect_url = response._headers['location'][1]
         self.assertEqual(  '/info/', redirect_url )
+
+    def test_invalid_key(self):
+        """ Checks non 'isbn' or 'oclc' key. """
+        response = self.client.get( '/v2/foo/{}/'.format( settings_app.TEST_ISBN_FOUND_01) )  # project root part of url is assumed
+        response_dct = json.loads( response.content )
+        self.assertEqual( 'query_key bad', response_dct['response']['error'] )
 
     # end class UrlTest()
 

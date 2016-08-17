@@ -47,10 +47,10 @@ class HandlerHelper( object ):
             Called by availability_service.availability_app.handler(). """
         message = u'init'
         if key not in self.legit_services:
-            message = u'service_id bad'
-        if message == u'init':
-            message = u'good'
-        log.debug( u'message, {}'.format(message) )
+            message = 'query_key bad'
+        if message == 'init':
+            message = 'good'
+        log.debug( 'message, {}'.format(message) )
         return message
 
     # def build_response_dict( self, key, value, show_marc_param ):

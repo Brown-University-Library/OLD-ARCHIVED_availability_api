@@ -31,14 +31,8 @@ def handler( request, id_type, id_value ):
     validation = helper.validate( id_type, id_value )
     if not validation == u'good':
         return_dict = { u'query': query, u'response': {u'error': validation} }
-        return flask.jsonify( return_dict )
-    response = helper.build_response_dict(
-        id_type, id_value, request.GET.get('show_marc', '') )
-
-
-    jsn = json.dumps( {u'query': query, u'response': response}, sort_keys=True, indent=2 )
+        jsn = json.dumps( return_dict, sort_keys=True, indent=2 )
+    else:
+        response = helper.build_response_dict( id_type, id_value, request.GET.get('show_marc', '') )
+        jsn = json.dumps( {u'query': query, u'response': response}, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
-
-
-    # now = datetime.datetime.now()
-    # return HttpResponse( '<p>hi</p> <p>( {} )</p>'.format(unicode(now)) )
