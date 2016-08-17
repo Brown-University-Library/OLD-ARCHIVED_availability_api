@@ -199,7 +199,8 @@ class Searcher( object ):
         item_entry[u'lccn'] = self.make_lccn( marc_dict )
         item_entry[u'bibid'] = self.make_bibid( marc_dict )
         item_entry[u'issn'] = self.make_issn( marc_dict )
-        item_entry[u'josiah_bib_url'] = u'%s/record=%s' % ( u'https://josiah.brown.edu', item_entry[u'bibid'][1:-1] )  # removes period & check-digit
+        item_entry[u'bib_url_josiah_classic'] = u'%s/record=%s' % ( u'https://josiah.brown.edu', item_entry[u'bibid'][1:-1] )  # removes period & check-digit
+        item_entry[u'bib_url_josiah'] = 'https://search.library.brown.edu/catalog/{}/'.format( item_entry[u'bibid'][1:-1] )
         item_entry[u'oclc_brown'] = self.make_oclc_brown( marc_dict )
         self.logger.debug( u'in z3950_wrapper.Searcher.process_marc_data(); pprint.pformat(item_entry), `%s`' % pprint.pformat(item_entry) )
         return item_entry
