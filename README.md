@@ -1,7 +1,8 @@
 ##### overview
 
-UNDER CONSTRUCTION
+- Provides an availability-status API to our [Millennium ILS](https://www.iii.com/products/millennium), using [Z39.50](https://en.wikipedia.org/wiki/Z39.50).
+    - for reference & comparison: [old OPAC interface](https://josiah.brown.edu)
 
-Minimalist [passenger](https://www.phusionpassenger.com)-compatible [django](https://www.djangoproject.com) project.
+- Allows lookup on oclc-number or isbn, and returns back item-records grouped according to bibnum.
 
 ---
