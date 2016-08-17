@@ -154,53 +154,18 @@ class Searcher( object ):
             Called by search() """
         item_list = []
         for result in resultset:
-            ## start w/marc
-            log.debug( 'type(result), `{}`'.format(type(result)) )
-            log.debug( 'result, `{}`'.format(repr(result)) )
-            log.debug( 'result.data, ```{}```'.format(pprint.pformat(result.data)) )
-            try:
+            try:  ## start w/marc
                 marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
-                log.debug( 'marc_record_object obtained' )
             except Exception as e:
                 log.warning( 'could not get a marc_record_object, Exception, {}'.format(unicode(repr(e))) )
                 continue
             item_entry = self.process_marc_data( marc_record_object, marc_flag )
-            ## add holdings
-            try:
-                holdings_record_data = result.data.holdingsData
-                item_entry['holdings_data'] = self.process_holdings_data( holdings_record_data )
-            except Exception as e:
-                log.warning( 'error trying to read holdings data, ```{}```'.format(unicode(repr(e))) )
-                item_entry['holdings_data'] = []
-            ## update main list
-            if item_list == []:
-                item_list.append( item_entry )
-            else:
-                add_flag = True
-                for existing_entry in item_list:
-                    existing_bib = existing_entry['bibid']
-                    if item_entry['bibid'] == existing_bib:
-                        add_flag = False
-                        break
-                if add_flag == True:
-                    item_list.append( item_entry )
-
-        self.logger.debug( u'in z3950_wrapper.Searcher.process_resultset, pprint.pformat(item_list), `%s`' % pprint.pformat(item_list) )
+            item_entry['holdings_data'] = self.add_holdings_data( result )
+            self.update_item_list( item_list, item_entry )
+        self.logger.debug( 'item_list, `%s`' % pprint.pformat(item_list) )
         return item_list
 
-    def process_holdings_data( self, holdings_data ):
-        """ Pulls out callnumber, location, and public_note.
-            Called by process_resultset() """
-        record_holdings_data = []
-        for holdings_entry in holdings_data:
-            entry = {}
-            holdings_object = holdings_entry[1]
-            entry[u'callNumber'] = holdings_object.callNumber
-            entry[u'localLocation'] = holdings_object.localLocation
-            entry[u'publicNote'] = holdings_object.publicNote
-            record_holdings_data.append( entry )
-        self.logger.debug( u'in z3950_wrapper.Searcher.process_holdings_data, pprint.pformat(record_holdings_data), `%s`' % pprint.pformat(record_holdings_data) )
-        return record_holdings_data
+    ## for process_resultset()... ##
 
     def process_marc_data( self, marc_record_object, marc_flag ):
         """ Creates bib-dct.
@@ -222,7 +187,54 @@ class Searcher( object ):
         self.logger.debug( u'in z3950_wrapper.Searcher.process_marc_data(); pprint.pformat(item_entry), `%s`' % pprint.pformat(item_entry) )
         return item_entry
 
+    def add_holdings_data( self, result ):
+        """ Extracts holdings data if available.
+            Called by process_resultset() """
+        try:
+            holdings_record_data = result.data.holdingsData
+            holdings_data = self.process_holdings_data( holdings_record_data )
+        except Exception as e:
+            log.warning( 'error trying to read holdings data, ```{}```'.format(unicode(repr(e))) )
+            holdings_data = []
+        return holdings_data
+
+    def update_item_list( self, item_list, item_entry ):
+        """ Adds item if it's not a duplicate.
+            Called by process_resultset() """
+        if item_list == []:
+            item_list.append( item_entry )
+        else:
+            add_flag = True
+            for existing_entry in item_list:
+                existing_bib = existing_entry['bibid']
+                if item_entry['bibid'] == existing_bib:
+                    add_flag = False
+                    break
+            if add_flag == True:
+                item_list.append( item_entry )
+        return item_list
+
+    ## ...end for process_resultset() ##
+
+    def process_holdings_data( self, holdings_data ):
+        """ Pulls out callnumber, location, and public_note.
+            Called by add_holdings_data() """
+        record_holdings_data = []
+        for holdings_entry in holdings_data:
+            entry = {}
+            holdings_object = holdings_entry[1]
+            entry[u'callNumber'] = holdings_object.callNumber
+            entry[u'localLocation'] = holdings_object.localLocation
+            entry[u'publicNote'] = holdings_object.publicNote
+            record_holdings_data.append( entry )
+        self.logger.debug( u'in z3950_wrapper.Searcher.process_holdings_data, pprint.pformat(record_holdings_data), `%s`' % pprint.pformat(record_holdings_data) )
+        return record_holdings_data
+
+    ## for process_marc_data()... ##
+
     def make_marc_callnumber( self, marc_dict ):
+        """ Populates callnumber value.
+            Called by process_marc_data() """
         ( callnumber, subfield_callnumber ) = ( u'callnumber_not_available', u'' )
         for field in marc_dict[u'fields']:
             ( key, val ) = field.items()[0]
@@ -256,12 +268,16 @@ class Searcher( object ):
         return return_items_data
 
     def make_945_barcode( self, item ):
+        """ Populates barcode value.
+            Called by make_items_data() """
         barcode = item[u'i']
         if barcode is not None:
             barcode = barcode.replace(u' ', u'')
         return barcode
 
     def interpret_itemsdict( self, dct, marc_record_object ):
+        """ Stubs data to produce.
+            Called by make_items_data() """
         dct[u'location_interpreted'] = u'coming'
         dct[u'status_interpreted'] = u'coming'
         dct[u'itype_interpreted'] = u'coming'
@@ -269,7 +285,8 @@ class Searcher( object ):
         return dct
 
     def build_full_callnumber( self, callnumber_suffix, nine_oh_obj ):
-        """ Adds interpreted full callnumber for possible need to match on holdings data. """
+        """ Adds interpreted full callnumber for possible need to match on holdings data.
+            Called by interpret_itemsdict() """
         self.logger.debug( u'in z3950_wrapper.Searcher.build_full_callnumber(); callnumber_suffix, `%s`' % callnumber_suffix )
         self.logger.debug( u'in z3950_wrapper.Searcher.build_full_callnumber(); nine_oh_obj, `%s`' % nine_oh_obj )
         full_callnumber = u''
@@ -278,6 +295,8 @@ class Searcher( object ):
         return full_callnumber
 
     def make_lccn( self, marc_dict ):
+        """ Populates lccn value.
+            Called by process_marc_data() """
         lccn = u'lccn_not_available'
         for field in marc_dict[u'fields']:
             ( key, val ) = field.items()[0]
@@ -326,7 +345,11 @@ class Searcher( object ):
         self.logger.debug( u'in z3950_wrapper.Searcher.make_oclc_brown(); oclc, `%s`' % oclc )
         return oclc
 
+    ## ...end for process_marc_data() ##
+
     def make_error_dict( self ):
+        """ Handles high-level search exception.
+            Called by search() """
         error_dict = {
             u'error-type': sys.exc_info()[0],
             u'error-message': sys.exc_info()[1],
@@ -334,4 +357,4 @@ class Searcher( object ):
             }
         return error_dict
 
-    # end class Searcher()
+    ## end class Searcher()
