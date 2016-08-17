@@ -165,7 +165,10 @@ class Searcher( object ):
                 log.warning( 'could not get a marc_record_object, Exception, {}'.format(unicode(repr(e))) )
             item_entry = self.process_marc_data( marc_record_object, marc_flag )
             ## add holdings
-            holdings_record_data = result.data.holdingsData
+            try:
+                holdings_record_data = result.data.holdingsData
+            except Exception as e:
+                log.warning( 'error trying to read holdings data, ```{}```'.format(unicode(repr(e))) )
             item_entry[u'holdings_data'] = self.process_holdings_data( holdings_record_data )
             item_list.append( item_entry )
         self.logger.debug( u'in z3950_wrapper.Searcher.process_resultset, pprint.pformat(item_list), `%s`' % pprint.pformat(item_list) )

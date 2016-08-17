@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-import logging
+import logging, pprint
 from availability_app import settings_app
 from django.test import TestCase
 
@@ -47,6 +47,7 @@ class IsbnTest( TestCase ):
         """ Checks found isbn that was problematic in old api'. """
         response = self.client.get( '/v2/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_02) )  # project root part of url is assumed
         content = response.content.decode('utf-8')
+        log.debug( 'content, ```{}```'.format(pprint.pformat(content)) )
         self.assertTrue( 'foo' in content )
 
 
