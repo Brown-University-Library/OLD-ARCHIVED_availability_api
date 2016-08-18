@@ -15,7 +15,7 @@ https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/
 Prepares application environment.
 Variables assume project setup like:
 stuff
-    availability_api
+    availability_api_project
         availability_app
         config
     env_avl
@@ -29,7 +29,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 
 ## vars
 ACTIVATE_FILE = os.path.abspath( u'%s/../../env_avl/bin/activate_this.py' % current_directory )
-PROJECT_DIR = os.path.abspath( u'%s/../../availability_api' % current_directory )
+PROJECT_DIR = os.path.abspath( u'%s/../../availability_api_project' % current_directory )
 PROJECT_ENCLOSING_DIR = os.path.abspath( u'%s/../..' % current_directory )
 SETTINGS_MODULE = u'config.settings'
 SITE_PACKAGES_DIR = os.path.abspath( u'%s/../../env_avl/lib/python2.7/site-packages' % current_directory )
