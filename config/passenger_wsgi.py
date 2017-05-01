@@ -1,56 +1,31 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """
-WSGI config for availability_api.
+WSGI config.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/
+https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/
 """
 
-"""
-Prepares application environment.
-Variables assume project setup like:
-stuff
-    availability_api_project
-        availability_app
-        config
-    env_avl
-"""
-# print 'starting passenger_wsgi.py file'
 import os, pprint, sys
+import shellvars
 
 
-## become self-aware, padawan
-current_directory = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR_PATH = os.path.dirname( os.path.dirname(os.path.abspath(__file__)) )
+ENV_SETTINGS_FILE = os.environ['AVL_API__SETTINGS_PATH']  # set in `conf.d/passenger.conf`, and `env/bin/activate`
 
-## vars
-ACTIVATE_FILE = os.path.abspath( u'%s/../../env_avl/bin/activate_this.py' % current_directory )
-PROJECT_DIR = os.path.abspath( u'%s/../../availability_api_project' % current_directory )
-PROJECT_ENCLOSING_DIR = os.path.abspath( u'%s/../..' % current_directory )
-SETTINGS_MODULE = u'config.settings'
-SITE_PACKAGES_DIR = os.path.abspath( u'%s/../../env_avl/lib/python2.7/site-packages' % current_directory )
+## update path
+sys.path.append( PROJECT_DIR_PATH )
 
-## virtualenv
-execfile( ACTIVATE_FILE, dict(__file__=ACTIVATE_FILE) )
-
-## sys.path additions
-for entry in [PROJECT_DIR, PROJECT_ENCLOSING_DIR, SITE_PACKAGES_DIR]:
- if entry not in sys.path:
-   sys.path.append( entry )
-
-## environment additions
-os.environ[u'DJANGO_SETTINGS_MODULE'] = SETTINGS_MODULE  # so django can access its settings
+## reference django settings
+os.environ[u'DJANGO_SETTINGS_MODULE'] = 'config.settings'  # so django can access its settings
 
 ## load up env vars
-SETTINGS_FILE = os.environ['AVL_API__SETTINGS_PATH']  # set in activate_this.py, and activated above
-import shellvars
-var_dct = shellvars.get_vars( SETTINGS_FILE )
+var_dct = shellvars.get_vars( ENV_SETTINGS_FILE )
 for ( key, val ) in var_dct.items():
-    os.environ[key] = val
+    os.environ[key.decode('utf-8')] = val.decode('utf-8')
 
 ## gogogo
 from django.core.wsgi import get_wsgi_application
