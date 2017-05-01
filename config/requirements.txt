@@ -1,11 +1,11 @@
-Django==1.9.7
-ply==3.8
-pymarc==3.1.2
-PyMySQL==0.7.4
-requests==2.10.0
-shellvars-py==0.1.2
+Django==1.11
+ply==3.10
+pymarc==3.1.6
+PyMySQL==0.7.11
+requests==2.13.0
+git+https://github.com/birkin/shellvars-py.git
 
 ## local fork of PyZ3950 version 2.04
-## todo: add version to grab
-## note: ply
+## todo: add version to grab (2.4 currently)
+## note: requires ply
 git+https://github.com/Brown-University-Library/PyZ3950.git
