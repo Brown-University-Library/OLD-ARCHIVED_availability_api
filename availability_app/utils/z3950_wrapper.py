@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """
 Wrapper for z3950 library call & data-extraction.
 Resources:
@@ -87,7 +85,7 @@ class Searcher( object ):
                     value = u'ocm%s' % new_value
                 else:
                     value = u'ocn%s' % new_value
-            except Exception, e:
+            except Exception as e:
                 value = u'invalid_oclc_number'
         return value
 
