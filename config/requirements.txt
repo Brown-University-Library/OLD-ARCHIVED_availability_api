@@ -8,4 +8,5 @@ git+https://github.com/birkin/shellvars-py.git
 ## local fork of PyZ3950 version 2.04
 ## todo: add version to grab (2.4 currently)
 ## note: requires ply
-git+https://github.com/Brown-University-Library/PyZ3950.git
+## disabling the load below to call an install of it via subprocess.
+#git+https://github.com/Brown-University-Library/PyZ3950.git
