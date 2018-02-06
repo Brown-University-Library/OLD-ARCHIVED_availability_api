@@ -38,7 +38,7 @@ class UrlTest( TestCase ):
     # end class UrlTest()
 
 
-class IsbnUrlTest( TestCase ):
+class V2_IsbnUrlTest( TestCase ):
     """ Checks isbn urls. """
 
     def test_found_isbn_1(self):
@@ -69,4 +69,4 @@ class IsbnUrlTest( TestCase ):
         self.assertTrue( 'Africa and Africans' in content )
         self.assertTrue( 'The Kongolese Saint Anthony' in content )
 
-    # end class IsbnUrlTest
+    # end class V2_IsbnUrlTest
