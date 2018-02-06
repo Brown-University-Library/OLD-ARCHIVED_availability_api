@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """
 Helper for views.handler()
 """
 
 import datetime, logging, os
-
 from availability_app import settings_app
-from availability_app.utils import z3950_wrapper
-# from availability_service.utils import backend
-# from availability_service.utils import z3950_wrapper
-# from werkzeug.contrib.cache import FileSystemCache
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +28,7 @@ class HandlerHelper( object ):
         start_time = datetime.datetime.now()
         query_dict = {
             u'url': url,
-            u'query_timestamp': unicode(start_time),
+            u'query_timestamp': str(start_time),
             u'query_key': key,
             u'query_value': value, }
         if show_marc_param == u'true':
@@ -69,21 +62,28 @@ class HandlerHelper( object ):
     def build_response_dict( self, key, value, show_marc_param ):
         """ Handler for cached z39.50 call and response.
             Called by availability_service.availability_app.handler(). """
-        assert type(value) == unicode
+        assert type(value) == str
         response_dict = self.query_josiah( key, value, show_marc_param )
         return response_dict
+
+    # def query_josiah( self, key, value, show_marc_param ):
+    #     """ Perform actual query.
+    #         Called by self.build_response_dict(). """
+    #     marc_flag = True if show_marc_param == u'true' else False
+    #     srchr = z3950_wrapper.Searcher(
+    #         HOST=self.HOST, PORT=self.PORT, DB_NAME=self.DB_NAME, connect_flag=True
+    #         )
+    #     item_list = srchr.search( key, value, marc_flag )
+    #     srchr.close_connection()
+    #     return {
+    #         u'backend_response': item_list,
+    #         u'response_timestamp': unicode(datetime.datetime.now()) }
+
 
     def query_josiah( self, key, value, show_marc_param ):
         """ Perform actual query.
             Called by self.build_response_dict(). """
-        marc_flag = True if show_marc_param == u'true' else False
-        srchr = z3950_wrapper.Searcher(
-            HOST=self.HOST, PORT=self.PORT, DB_NAME=self.DB_NAME, connect_flag=True
-            )
-        item_list = srchr.search( key, value, marc_flag )
-        srchr.close_connection()
-        return {
-            u'backend_response': item_list,
-            u'response_timestamp': unicode(datetime.datetime.now()) }
+        ## TODO
+        return
 
     # end class HandlerHelper

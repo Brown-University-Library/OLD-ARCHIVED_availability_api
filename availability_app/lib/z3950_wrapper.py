@@ -1,18 +1,44 @@
 # -*- coding: utf-8 -*-
 
 """
-Wrapper for z3950 library call & data-extraction.
+Py2 wrapper for z3950 library call & data-extraction.
 Resources:
 - z3950 library docs, http://www.panix.com/~asl2/software/PyZ3950/zoom.html
 - list of record formats,  http://lists.indexdata.dk/pipermail/zoom/2003-November/000547.html
 """
 
-import logging, os, pprint, sys
+from __future__ import unicode_literals
 
+import argparse, datetime, logging, os, pprint, sys
+
+assert sys.version_info < ( 3, )
+
+## activate venv
+script_dir_path = os.path.dirname(sys.argv[0])
+full_script_dir_path = os.path.abspath( script_dir_path )
+ACTIVATE_FILE = '%s/py2env_pyz3950/bin/activate_this.py' % full_script_dir_path
+execfile( ACTIVATE_FILE, dict(__file__=ACTIVATE_FILE) )
+
+## rest of imports
 from PyZ3950 import zoom  # fork, git+https://github.com/Brown-University-Library/PyZ3950.git
 from pymarc import Record  # pymarc==3.0.2
 
 
+## settings
+LOG_PATH = os.environ['PY2Z__LOG_PATH']
+LOG_LEVEL = os.environ['PY2Z__LOG_LEVEL']
+HOST = os.environ['PY2Z__ZHOST']
+PORT = os.environ['PY2Z__ZPORT']
+DB_NAME = os.environ['PY2Z__ZDB_NAME']
+
+
+## logging
+level_dct = { 'DEBUG': logging.DEBUG, 'INFO': logging.INFO }
+logging.basicConfig(
+    filename=LOG_PATH,
+    level=level_dct[LOG_LEVEL],
+    format=u'[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s', datefmt=u'%d/%b/%Y %H:%M:%S'
+)
 log = logging.getLogger(__name__)
 
 
@@ -356,3 +382,34 @@ class Searcher( object ):
         return error_dict
 
     ## end class Searcher()
+
+
+def query_josiah( key, value, show_marc_param ):
+    """ Perform actual query.
+        Called by self.build_response_dict(). """
+    marc_flag = True if show_marc_param == u'true' else False
+    srchr = Searcher(
+        HOST=HOST, PORT=PORT, DB_NAME=DB_NAME, connect_flag=True
+    )
+    item_list = srchr.search( key, value, marc_flag )
+    srchr.close_connection()
+    return_dct = {
+        u'backend_response': item_list,
+        u'response_timestamp': unicode(datetime.datetime.now())
+    }
+    log.debug( 'return_dct, ```%s```' % pprint.pformat(return_dct) )
+    return return_dct
+
+
+if __name__ == '__main__':
+    log.debug( '\n\n---\nstarting main' )
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument(
+        '--key', help='`isbn` or `oclc`'
+    )
+    parser.add_argument(
+        '--value', help='the isbn or the oclc-number'
+    )
+    args = parser.parse_args()
+    log.debug( 'args, ```%s```' % args )
+    query_josiah( key=args.key, value=args.value, show_marc_param=False )
