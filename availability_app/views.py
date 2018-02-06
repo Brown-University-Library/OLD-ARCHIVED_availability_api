@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import datetime, json, logging, os, pprint
 
 from availability_app.utils.app_helper import HandlerHelper
