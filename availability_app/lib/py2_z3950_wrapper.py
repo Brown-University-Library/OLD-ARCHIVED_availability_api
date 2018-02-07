@@ -9,7 +9,7 @@ Resources:
 
 from __future__ import unicode_literals
 
-import argparse, datetime, logging, os, pprint, sys
+import argparse, datetime, json, logging, os, pprint, sys
 
 assert sys.version_info < ( 3, )
 
@@ -69,6 +69,27 @@ class Searcher( object ):
         self.logger.debug( u'in z3950_wrapper.Searcher.close_connection(); closing connection.')
         self.connection.close()
 
+    # def search( self, key, value, marc_flag=False ):
+    #     """ Convenience function.
+    #         Called by utils.app_helper.HandlerHelper.query_josiah() """
+    #     try:
+    #         qstring = self.build_qstring( key, value )
+    #         qobject = self.build_qobject( qstring )
+    #         resultset = self.connection.search( qobject )
+    #         items = []
+    #         for result in resultset:
+    #             marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
+    #             marc_dict = marc_record_object.as_dict()
+    #             items.append( marc_dict )
+    #         log.debug( 'items, ```%s```' % pprint.pformat(items) )
+    #         jsn = json.dumps( items )
+    #         print jsn
+    #         return jsn
+    #     except Exception as e:
+    #         self.close_connection()
+    #         error_dict = self.make_error_dict()
+    #         self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+
     def search( self, key, value, marc_flag=False ):
         """ Convenience function.
             Called by utils.app_helper.HandlerHelper.query_josiah() """
@@ -76,6 +97,7 @@ class Searcher( object ):
             qstring = self.build_qstring( key, value )
             qobject = self.build_qobject( qstring )
             resultset = self.connection.search( qobject )
+            # return resultset
             # self.inspect_resultset( resultset )  # for debugging
             item_list = self.process_resultset( resultset, marc_flag )  # marc_flag typically False
             return item_list
@@ -216,6 +238,7 @@ class Searcher( object ):
             Called by process_resultset() """
         try:
             holdings_record_data = result.data.holdingsData
+            log.debug( 'holdings_record_data, ```%s```' % holdings_record_data )
             holdings_data = self.process_holdings_data( holdings_record_data )
         except Exception as e:
             log.warning( 'error trying to read holdings data, ```{}```'.format(unicode(repr(e))) )
