@@ -16,7 +16,11 @@ assert sys.version_info < ( 3, )
 ## activate venv
 script_dir_path = os.path.dirname(sys.argv[0])
 full_script_dir_path = os.path.abspath( script_dir_path )
-ACTIVATE_FILE = '%s/py2env_pyz3950/bin/activate_this.py' % full_script_dir_path
+full_app_dir_path = os.path.dirname( full_script_dir_path )
+full_project_dir_path = os.path.dirname( full_app_dir_path )
+full_stuff_dir_path = os.path.dirname( full_project_dir_path )
+ACTIVATE_FILE = '%s/py2_z3950_stuff/py2env_pyz3950/bin/activate_this.py' % full_stuff_dir_path
+# print 'ACTIVATE_FILE path, ```%s```' % ACTIVATE_FILE
 execfile( ACTIVATE_FILE, dict(__file__=ACTIVATE_FILE) )
 
 ## rest of imports
@@ -69,27 +73,6 @@ class Searcher( object ):
         self.logger.debug( u'in z3950_wrapper.Searcher.close_connection(); closing connection.')
         self.connection.close()
 
-    # def search( self, key, value, marc_flag=False ):
-    #     """ Convenience function.
-    #         Called by utils.app_helper.HandlerHelper.query_josiah() """
-    #     try:
-    #         qstring = self.build_qstring( key, value )
-    #         qobject = self.build_qobject( qstring )
-    #         resultset = self.connection.search( qobject )
-    #         items = []
-    #         for result in resultset:
-    #             marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
-    #             marc_dict = marc_record_object.as_dict()
-    #             items.append( marc_dict )
-    #         log.debug( 'items, ```%s```' % pprint.pformat(items) )
-    #         jsn = json.dumps( items )
-    #         print jsn
-    #         return jsn
-    #     except Exception as e:
-    #         self.close_connection()
-    #         error_dict = self.make_error_dict()
-    #         self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
-
     def search( self, key, value, marc_flag=False ):
         """ Convenience function.
             Called by utils.app_helper.HandlerHelper.query_josiah() """
@@ -97,14 +80,38 @@ class Searcher( object ):
             qstring = self.build_qstring( key, value )
             qobject = self.build_qobject( qstring )
             resultset = self.connection.search( qobject )
-            # return resultset
-            # self.inspect_resultset( resultset )  # for debugging
-            item_list = self.process_resultset( resultset, marc_flag )  # marc_flag typically False
-            return item_list
+            items = []
+            for result in resultset:
+                item_dct = {}
+                marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
+                marc_dct = marc_record_object.as_dict()
+                item_dct['marc_dct'] = marc_dct
+                item_dct['holdings_data'] = self.add_holdings_data( result )
+                items.append( item_dct )
+            log.debug( 'items, ```%s```' % pprint.pformat(items) )
+            jsn = json.dumps( items )
+            print jsn
+            return jsn
         except Exception as e:
             self.close_connection()
             error_dict = self.make_error_dict()
             self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+
+    # def search( self, key, value, marc_flag=False ):
+    #     """ Convenience function.
+    #         Called by utils.app_helper.HandlerHelper.query_josiah() """
+    #     try:
+    #         qstring = self.build_qstring( key, value )
+    #         qobject = self.build_qobject( qstring )
+    #         resultset = self.connection.search( qobject )
+    #         # return resultset
+    #         # self.inspect_resultset( resultset )  # for debugging
+    #         item_list = self.process_resultset( resultset, marc_flag )  # marc_flag typically False
+    #         return item_list
+    #     except Exception as e:
+    #         self.close_connection()
+    #         error_dict = self.make_error_dict()
+    #         self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
 
     def build_qstring( self, key, value ):
         """ Builds an arcane querystring, like `@attr 1=7 9780521593700`.
