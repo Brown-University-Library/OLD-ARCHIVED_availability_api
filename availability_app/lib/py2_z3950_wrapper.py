@@ -80,22 +80,45 @@ class Searcher( object ):
             qstring = self.build_qstring( key, value )
             qobject = self.build_qobject( qstring )
             resultset = self.connection.search( qobject )
+            import pickle
             items = []
             for result in resultset:
-                item_dct = {}
-                marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
-                marc_dct = marc_record_object.as_dict()
-                item_dct['marc_dct'] = marc_dct
-                item_dct['holdings_data'] = self.add_holdings_data( result )
-                items.append( item_dct )
-            log.debug( 'items, ```%s```' % pprint.pformat(items) )
-            jsn = json.dumps( items )
-            print jsn
-            return jsn
+                result_dct = { 'pymarc_obj': None, 'holdings_data': None }
+                result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
+                result_dct['holdings_data'] = self.add_holdings_data( result )
+            items.append( result_dct )
+            dmp = pickle.dumps( items )
+            log.debug( 'type(dmp), ```%s```' % type(dmp) )
+            print dmp
+            return dmp
         except Exception as e:
             self.close_connection()
             error_dict = self.make_error_dict()
             self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+
+    # def search( self, key, value, marc_flag=False ):
+    #     """ Convenience function.
+    #         Called by utils.app_helper.HandlerHelper.query_josiah() """
+    #     try:
+    #         qstring = self.build_qstring( key, value )
+    #         qobject = self.build_qobject( qstring )
+    #         resultset = self.connection.search( qobject )
+    #         items = []
+    #         for result in resultset:
+    #             item_dct = {}
+    #             marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
+    #             marc_dct = marc_record_object.as_dict()
+    #             item_dct['marc_dct'] = marc_dct
+    #             item_dct['holdings_data'] = self.add_holdings_data( result )
+    #             items.append( item_dct )
+    #         log.debug( 'items, ```%s```' % pprint.pformat(items) )
+    #         jsn = json.dumps( items )
+    #         print jsn
+    #         return jsn
+    #     except Exception as e:
+    #         self.close_connection()
+    #         error_dict = self.make_error_dict()
+    #         self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
 
     # def search( self, key, value, marc_flag=False ):
     #     """ Convenience function.
