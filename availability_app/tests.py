@@ -29,6 +29,14 @@ class UrlTest( TestCase ):
         redirect_url = response._headers['location'][1]
         self.assertEqual(  '/info/', redirect_url )
 
+    def test_info(self):
+        """ Checks '/availability_api/info/' """
+        response = self.client.get( '/info/' )  # project root part of url is assumed
+        log.debug( 'response, ```%s```' % response )
+        log.debug( 'response.content, ```%s```' % response.content )
+        self.assertEqual( 200, response.status_code )  # permanent redirect
+        self.assertTrue(  b'time' in response.content )
+
     # def test_invalid_key(self):
     #     """ Checks non 'isbn' or 'oclc' key. """
     #     response = self.client.get( '/v2/foo/{}/'.format( settings_app.TEST_ISBN_FOUND_01) )  # project root part of url is assumed
@@ -36,6 +44,8 @@ class UrlTest( TestCase ):
     #     self.assertEqual( 'query_key bad', response_dct['response']['error'] )
 
     # end class UrlTest()
+
+
 
 
 # class V2_IsbnUrlTest( TestCase ):
