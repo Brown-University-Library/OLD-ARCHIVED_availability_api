@@ -38,13 +38,27 @@ class UrlTest( TestCase ):
         self.assertTrue(  b'time' in response.content )
         self.assertEqual( ['documentation', 'elapsed_time', 'version'], sorted(list(response_dct['response'].keys())) )
 
+    ## end class UrlTest()
+
+
+class V1_UrlTest( TestCase ):
+    """ Checks isbn urls. """
+
+    def test_found_isbn_1(self):
+        """ Checks found isbn'. """
+        response = self.client.get( '/v1/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_01) )  # project root part of url is assumed
+        content = response.content.decode('utf-8')
+        self.assertTrue( '"bibid": ".b18151139"' in content )
+        self.assertTrue( '"bibid": ".b27679275"' in content )
+        self.assertTrue( 'Zen and the art of motorcycle maintenance' in content )
+
     # def test_invalid_key(self):
     #     """ Checks non 'isbn' or 'oclc' key. """
     #     response = self.client.get( '/v2/foo/{}/'.format( settings_app.TEST_ISBN_FOUND_01) )  # project root part of url is assumed
     #     response_dct = json.loads( response.content )
     #     self.assertEqual( 'query_key bad', response_dct['response']['error'] )
 
-    # end class UrlTest()
+    ## end class V2_IsbnUrlTest
 
 
 # class V2_IsbnUrlTest( TestCase ):
