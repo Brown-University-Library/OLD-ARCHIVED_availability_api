@@ -3,6 +3,9 @@
 import os
 
 
+DOCUMENTATION_URL = os.environ['AVL_API__DOCUMENTATIN_URL']
+
+
 ## for z39.50 lookups
 Z_HOST = os.environ['AVL_API__Z_HOST']
 Z_PORT = os.environ['AVL_API__Z_PORT']
