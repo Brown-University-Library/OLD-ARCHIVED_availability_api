@@ -1,8 +1,8 @@
-Django==1.11
-ply==3.10
-pymarc==3.1.6
-PyMySQL==0.7.11
-requests==2.13.0
+Django==1.11.15
+ply==3.11
+pymarc==3.1.10
+PyMySQL==0.9.2
+requests==2.19.1
 git+https://github.com/birkin/shellvars-py.git
 
 ## local fork of PyZ3950 version 2.04
