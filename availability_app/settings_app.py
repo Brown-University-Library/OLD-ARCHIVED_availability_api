@@ -3,7 +3,7 @@
 import os
 
 
-DOCUMENTATION_URL = os.environ['AVL_API__DOCUMENTATIN_URL']
+DOCUMENTATION_URL = os.environ['AVL_API__DOCUMENTATION_URL']
 
 
 ## for z39.50 lookups
