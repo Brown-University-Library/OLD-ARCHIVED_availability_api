@@ -48,11 +48,14 @@ def make_context( request, rq_now, info_txt, taken ):
         Called by views.info() """
     cntxt = {
         'request': {
-            'url': '%s://%s%s' % ( request.scheme, request.META['HTTP_HOST'], request.META.get('REQUEST_URI', request.META['PATH_INFO']) ),
+            'url': '%s://%s%s' % ( request.scheme,
+                request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
+                request.META.get('REQUEST_URI', request.META['PATH_INFO'])
+                ),
             'timestamp': str( rq_now )
         },
         'response': {
-            'documentation': '%s://%s%s' % ( request.scheme, request.META['HTTP_HOST'], settings_app.DOCUMENTATION_URL ),
+            'documentation': settings_app.DOCUMENTATION_URL,
             'version': info_txt,
             'elapsed_time': str( taken )
         }

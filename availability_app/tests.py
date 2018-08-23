@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 TestCase.maxDiff = None
 
 
-
 class UrlTest( TestCase ):
     """ Checks basic urls. """
 
@@ -32,10 +31,12 @@ class UrlTest( TestCase ):
     def test_info(self):
         """ Checks '/availability_api/info/' """
         response = self.client.get( '/info/' )  # project root part of url is assumed
-        log.debug( 'response, ```%s```' % response )
-        log.debug( 'response.content, ```%s```' % response.content )
+        # log.debug( 'response, ```%s```' % response )
+        # log.debug( 'response.content, ```%s```' % response.content )
+        response_dct = json.loads( response.content )
         self.assertEqual( 200, response.status_code )  # permanent redirect
         self.assertTrue(  b'time' in response.content )
+        self.assertEqual( ['documentation', 'elapsed_time', 'version'], sorted(list(response_dct['response'].keys())) )
 
     # def test_invalid_key(self):
     #     """ Checks non 'isbn' or 'oclc' key. """
@@ -44,8 +45,6 @@ class UrlTest( TestCase ):
     #     self.assertEqual( 'query_key bad', response_dct['response']['error'] )
 
     # end class UrlTest()
-
-
 
 
 # class V2_IsbnUrlTest( TestCase ):

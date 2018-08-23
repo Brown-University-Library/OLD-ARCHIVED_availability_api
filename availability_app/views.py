@@ -16,15 +16,9 @@ log = logging.getLogger(__name__)
 ezb1_helper = EzbV1Helper()
 
 
-# def info( request ):
-#     """ Returns simplest response. """
-#     log.debug( 'starting info()' )
-#     now = datetime.datetime.now()
-#     return HttpResponse( '<p>time: %s</p>' % str(now) )
-
-
 def info( request ):
     """ Returns basic data including branch & commit. """
+    # log.debug( 'request.__dict__, ```%s```' % pprint.pformat(request.__dict__) )
     rq_now = datetime.datetime.now()
     commit = view_info_helper.get_commit()
     branch = view_info_helper.get_branch()
