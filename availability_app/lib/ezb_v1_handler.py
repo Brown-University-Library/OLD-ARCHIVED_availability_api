@@ -4,7 +4,7 @@
 Helper for views.handler()
 """
 
-import datetime, logging, os
+import datetime, logging, os, subprocess
 from availability_app import settings_app
 
 log = logging.getLogger(__name__)
@@ -25,6 +25,36 @@ class EzbV1Helper( object ):
     def __init__( self ):
         self.legit_services = [ 'isbn', 'oclc' ]
 
+    def validate( self, key, value ):
+        """ Stub for validation. IP checking another possibility.
+            Called by availability_service.availability_app.handler(). """
+        message = u'init'
+        if key not in self.legit_services:
+            message = 'query_key bad'
+        if message == 'init':
+            message = 'good'
+        log.debug( 'message, {}'.format(message) )
+        return message
+
+    def build_response_dct( self, key, value, show_marc_param ):
+        """ Handler for cached z39.50 call and response.
+            Called by views.ezb_v1(). """
+        pickled_data = self.query_josiah( key, value, show_marc_param )
+        return response_dct
+
+    def query_josiah( self, key, value, show_marc_param ):
+        """ Perform actual query.
+            Called by self.build_response_dict(). """
+        log.debug( 'starting query_josiah()' )
+        cmd_1 = 'cd %s' % ( settings_app.CMD_START_PATH )
+        cmd_2 = 'source %s' % ( settings_app.CMD_SOURCE_PATH )
+        cmd_3 = '%s/python2 %s/py2_z3950_wrapper.py --key %s --value %s' % ( settings_app.CMD_PY2_PATH, settings_app.CMD_WRAPPER_PATH, key, value )
+        py3_cmd = cmd_1 + '; ' + cmd_2 + '; ' + cmd_3
+        process = subprocess.Popen( py3_cmd, shell=True, stdout=subprocess.PIPE )
+        output, error = process.communicate()  # receive output from the python2 script
+        log.debug( 'output, ```%s```; error, ```%s```' % (output, error) )
+        return output
+
     def build_query_dict( self, url, key, value, show_marc_param ):
         """ Query reflector.
             Called by availability_service.availability_app.handler(). """
@@ -37,17 +67,6 @@ class EzbV1Helper( object ):
         if show_marc_param == u'true':
             query_dict[u'show_marc'] = show_marc_param
         return query_dict
-
-    def validate( self, key, value ):
-        """ Stub for validation. IP checking another possibility.
-            Called by availability_service.availability_app.handler(). """
-        message = u'init'
-        if key not in self.legit_services:
-            message = 'query_key bad'
-        if message == 'init':
-            message = 'good'
-        log.debug( 'message, {}'.format(message) )
-        return message
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
@@ -62,12 +81,6 @@ class EzbV1Helper( object ):
     #         cache.set( cache_key, response_dict )
     #     return response_dict
 
-    def build_response_dict( self, key, value, show_marc_param ):
-        """ Handler for cached z39.50 call and response.
-            Called by availability_service.availability_app.handler(). """
-        assert type(value) == str
-        response_dict = self.query_josiah( key, value, show_marc_param )
-        return response_dict
 
     # def query_josiah( self, key, value, show_marc_param ):
     #     """ Perform actual query.
@@ -83,11 +96,5 @@ class EzbV1Helper( object ):
     #         u'response_timestamp': unicode(datetime.datetime.now()) }
 
 
-    def query_josiah( self, key, value, show_marc_param ):
-        """ Perform actual query.
-            Called by self.build_response_dict(). """
-        ## TODO
-        log.debug( 'starting query_josiah()' )
-        return
 
     # end class HandlerHelper

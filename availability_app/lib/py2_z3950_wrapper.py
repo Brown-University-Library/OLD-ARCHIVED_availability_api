@@ -451,7 +451,8 @@ def query_josiah( key, value, show_marc_param ):
         u'response_timestamp': unicode(datetime.datetime.now())
     }
     log.debug( 'return_dct, ```%s```' % pprint.pformat(return_dct) )
-    return return_dct
+    # return return_dct
+    return 'foo'
 
 
 if __name__ == '__main__':

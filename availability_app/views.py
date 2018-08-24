@@ -36,11 +36,10 @@ def ezb_v1( request, id_type, id_value ):
     log.debug( 'starting; id_type, `%s`; id_value, `%s`' % (id_type, id_value) )
     validation = ezb1_helper.validate( id_type, id_value )
     if not validation == 'good':
-        return_dict = { 'query': query, u'response': {u'error': validation} }
-        jsn = json.dumps( return_dict, sort_keys=True, indent=2 )
+        data_dct = { 'query': query, u'response': {u'error': validation} }
     else:
-        response = ezb1_helper.build_response_dict( id_type, id_value, request.GET.get('show_marc', '') )
-        jsn = json.dumps( response, sort_keys=True, indent=2 )
+        data_dct = ezb1_helper.build_data_dct( id_type, id_value, request.GET.get('show_marc', '') )
+    jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
 
