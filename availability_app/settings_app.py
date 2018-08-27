@@ -7,10 +7,9 @@ DOCUMENTATION_URL = os.environ['AVL_API__DOCUMENTATION_URL']
 
 
 ## for z39.50 lookups
-Z_HOST = os.environ['AVL_API__Z_HOST']
-Z_PORT = os.environ['AVL_API__Z_PORT']
-Z_TYPE = os.environ['AVL_API__Z_TYPE']
-
+# Z_HOST = os.environ['AVL_API__Z_HOST']
+# Z_PORT = os.environ['AVL_API__Z_PORT']
+# Z_TYPE = os.environ['AVL_API__Z_TYPE']
 CMD_START_DIR_PATH = os.environ['AVL_API__CMD_START_DIR_PATH']
 CMD_ENV_BIN_DIR_PATH = os.environ['AVL_API__CMD_ENV_BIN_DIR_PATH']
 CMD_WRAPPER_DIR_PATH = os.environ['AVL_API__CMD_WRAPPER_DIR_PATH']
