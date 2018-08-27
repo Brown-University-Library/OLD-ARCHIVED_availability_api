@@ -211,18 +211,16 @@ class Searcher( object ):
 
 
 def query_josiah( key, value, show_marc_param ):
-    """ Perform actual query.
+    """ Manages call.
         Called by `if __name__ == '__main__':` """
     marc_flag = True if show_marc_param == 'true' else False
-    srchr = Searcher(
-        HOST=HOST, PORT=PORT, DB_NAME=DB_NAME, connect_flag=True
-    )
-    item_list = srchr.search( key, value, marc_flag )
-    srchr.close_connection()
+    srchr = Searcher( HOST=HOST, PORT=PORT, DB_NAME=DB_NAME, connect_flag=True )
+    try:
+        item_list = srchr.search( key, value, marc_flag )
+    finally:
+        srchr.close_connection()
     return_dct = {
-        'backend_response': item_list,
-        'response_timestamp': unicode(datetime.datetime.now())
-    }
+        'backend_response': item_list, 'response_timestamp': unicode(datetime.datetime.now()) }
     log.debug( 'return_dct, ```%s```' % pprint.pformat(return_dct) )
     print( return_dct )  # THIS outputs the data back to python3
     return
