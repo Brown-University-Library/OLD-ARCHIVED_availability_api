@@ -41,7 +41,7 @@ level_dct = { 'DEBUG': logging.DEBUG, 'INFO': logging.INFO }
 logging.basicConfig(
     filename=LOG_PATH,
     level=level_dct[LOG_LEVEL],
-    format=u'[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s', datefmt=u'%d/%b/%Y %H:%M:%S'
+    format='[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s', datefmt='%d/%b/%Y %H:%M:%S'
 )
 log = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class Searcher( object ):
             int(self.PORT),
             databaseName=self.DB_NAME,
             preferredRecordSyntax=u'OPAC',  # Getting records in "opac" format. (Others were not more helpful.)
-            charset=u'utf-8' )
+            charset='utf-8' )
         log.debug( 'connection made.')
         return conn
 
@@ -88,8 +88,10 @@ class Searcher( object ):
             return pickle_dmp
         except Exception as e:
             self.close_connection()
-            error_dict = self.make_error_dict()
-            self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+            message = 'exception, ```%s```' % unicode(repr(e))
+            # error_dict = self.make_error_dict()
+            # log.error( 'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+            log.error( message )
 
     # def search( self, key, value, marc_flag=False ):
     #     """ Convenience function.
@@ -134,15 +136,15 @@ class Searcher( object ):
     def build_qstring( self, key, value ):
         """ Builds an arcane querystring, like `@attr 1=7 9780521593700`.
             Called by search() """
-        if key == u'bib':
-            key = u'id'
+        if key == 'bib':
+            key = 'id'
         dct = {
-            u'isbn': u'@attr 1=7',
-            u'issn': u'@attr 1=8',
-            u'id': u'@attr 1=12',
-            u'oclc': u'@attr 1=1007', }
-        value = value   if key != u'oclc'   else self.update_oclc_value( value )
-        qstring = u'%s %s' % ( dct[key], value )
+            'isbn': '@attr 1=7',
+            'issn': '@attr 1=8',
+            'id': '@attr 1=12',
+            'oclc': '@attr 1=1007', }
+        value = value   if key != 'oclc'   else self.update_oclc_value( value )
+        qstring = '%s %s' % ( dct[key], value )
         log.debug( 'qstring, `%s`' % qstring )
         return qstring
 
@@ -150,24 +152,24 @@ class Searcher( object ):
         """ Updates oclc number to brown-formatted number if necessary.
             Reference: http://www.oclc.org/batchprocessing/controlnumber.htm
             Called by build_qstring() """
-        if not ( value.startswith(u'ocn') or value.startswith(u'ocm') ):
+        if not ( value.startswith('ocn') or value.startswith(u'ocm') ):
             try:
                 int_value = int(value)
                 new_value = unicode(int_value).zfill( 8 )
                 if int_value <= 99999999:
-                    value = u'ocm%s' % new_value
+                    value = 'ocm%s' % new_value
                 else:
-                    value = u'ocn%s' % new_value
+                    value = 'ocn%s' % new_value
             except Exception as e:
-                value = u'invalid_oclc_number'
+                value = 'invalid_oclc_number'
         return value
 
     def build_qobject( self, qstring ):
         """ Builds and returns a PyZ3950.zoom.Query instance object.
             Called by search() """
         qobject = zoom.Query(
-            u'PQF'.encode(u'utf-8'),
-            qstring.encode(u'utf-8')
+            'PQF'.encode('utf-8'),
+            qstring.encode('utf-8')
             )
         log.debug( 'type(qobject), `%s`' % type(qobject) )
         log.debug( 'pprint.pformat(qobject), `%s`' % pprint.pformat(qobject) )
@@ -197,15 +199,15 @@ class Searcher( object ):
 def query_josiah( key, value, show_marc_param ):
     """ Perform actual query.
         Called by `if __name__ == '__main__':` """
-    marc_flag = True if show_marc_param == u'true' else False
+    marc_flag = True if show_marc_param == 'true' else False
     srchr = Searcher(
         HOST=HOST, PORT=PORT, DB_NAME=DB_NAME, connect_flag=True
     )
     item_list = srchr.search( key, value, marc_flag )
     srchr.close_connection()
     return_dct = {
-        u'backend_response': item_list,
-        u'response_timestamp': unicode(datetime.datetime.now())
+        'backend_response': item_list,
+        'response_timestamp': unicode(datetime.datetime.now())
     }
     log.debug( 'return_dct, ```%s```' % pprint.pformat(return_dct) )
     # return return_dct
