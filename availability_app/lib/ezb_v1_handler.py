@@ -36,19 +36,20 @@ class EzbV1Helper( object ):
         log.debug( 'message, {}'.format(message) )
         return message
 
-    def build_response_dct( self, key, value, show_marc_param ):
+    def build_data_dct( self, key, value, show_marc_param ):
         """ Handler for cached z39.50 call and response.
             Called by views.ezb_v1(). """
+        data_dct = { 'foo': 'hi' }
         pickled_data = self.query_josiah( key, value, show_marc_param )
-        return response_dct
+        return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
         """ Perform actual query.
             Called by self.build_response_dict(). """
         log.debug( 'starting query_josiah()' )
-        cmd_1 = 'cd %s' % ( settings_app.CMD_START_PATH )
-        cmd_2 = 'source %s' % ( settings_app.CMD_SOURCE_PATH )
-        cmd_3 = '%s/python2 %s/py2_z3950_wrapper.py --key %s --value %s' % ( settings_app.CMD_PY2_PATH, settings_app.CMD_WRAPPER_PATH, key, value )
+        cmd_1 = 'cd %s' % ( settings_app.CMD_START_DIR_PATH )
+        cmd_2 = 'source %s/activate' % ( settings_app.CMD_ENV_BIN_DIR_PATH )
+        cmd_3 = '%s/python2 %s/py2_z3950_wrapper.py --key %s --value %s' % ( settings_app.CMD_ENV_BIN_DIR_PATH, settings_app.CMD_WRAPPER_DIR_PATH, key, value )
         py3_cmd = cmd_1 + '; ' + cmd_2 + '; ' + cmd_3
         process = subprocess.Popen( py3_cmd, shell=True, stdout=subprocess.PIPE )
         output, error = process.communicate()  # receive output from the python2 script
