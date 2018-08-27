@@ -4,7 +4,7 @@
 Helper for views.handler()
 """
 
-import datetime, logging, os, subprocess
+import datetime, logging, os, pprint, subprocess
 from availability_app import settings_app
 
 log = logging.getLogger(__name__)
@@ -36,10 +36,11 @@ class EzbV1Helper( object ):
         log.debug( 'message, {}'.format(message) )
         return message
 
-    def build_data_dct( self, key, value, show_marc_param ):
+    def build_data_dct( self, key, value, show_marc_param, request ):
         """ Handler for cached z39.50 call and response.
             Called by views.ezb_v1(). """
-        data_dct = { 'foo': 'hi' }
+        rq_now = datetime.datetime.now()
+        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
         return data_dct
 
@@ -56,18 +57,29 @@ class EzbV1Helper( object ):
         log.debug( 'output, ```%s```; error, ```%s```' % (output, error) )
         return output
 
-    def build_query_dict( self, url, key, value, show_marc_param ):
-        """ Query reflector.
-            Called by availability_service.availability_app.handler(). """
-        start_time = datetime.datetime.now()
-        query_dict = {
-            u'url': url,
-            u'query_timestamp': str(start_time),
-            u'query_key': key,
-            u'query_value': value, }
-        if show_marc_param == u'true':
-            query_dict[u'show_marc'] = show_marc_param
-        return query_dict
+    def build_query_dict( self, request, rq_now ):
+        query_dct = {
+            'url': '%s://%s%s' % ( request.scheme,
+                request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
+                request.META.get('REQUEST_URI', request.META['PATH_INFO'])
+                ),
+            'timestamp': str( rq_now )
+            }
+        log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
+        return query_dct
+
+    # def build_query_dict( self, url, key, value, show_marc_param ):
+    #     """ Query reflector.
+    #         Called by availability_service.availability_app.handler(). """
+    #     start_time = datetime.datetime.now()
+    #     query_dict = {
+    #         u'url': url,
+    #         u'query_timestamp': str(start_time),
+    #         u'query_key': key,
+    #         u'query_value': value, }
+    #     if show_marc_param == u'true':
+    #         query_dict[u'show_marc'] = show_marc_param
+    #     return query_dict
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
