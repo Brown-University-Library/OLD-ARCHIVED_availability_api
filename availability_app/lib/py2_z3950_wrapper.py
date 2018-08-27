@@ -82,10 +82,8 @@ class Searcher( object ):
                 result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
                 result_dct['holdings_data'] = self.add_holdings_data( result )
             items.append( result_dct )
-            pickle_dmp = pickle.dumps( items )
-            log.debug( 'type(pickle_dmp), ```%s```' % type(pickle_dmp) )
-            # print pickle_dmp
-            return pickle_dmp
+            log.debug( 'len(items), `%s`; items, %s' % (len(items), pprint.pformat(items)) )
+            return items
         except Exception as e:
             self.close_connection()
             message = 'exception, ```%s```' % unicode(repr(e))
@@ -222,7 +220,10 @@ def query_josiah( key, value, show_marc_param ):
     return_dct = {
         'backend_response': item_list, 'response_timestamp': unicode(datetime.datetime.now()) }
     log.debug( 'return_dct, ```%s```' % pprint.pformat(return_dct) )
-    print( return_dct )  # THIS outputs the data back to python3
+    pickle_dmp = pickle.dumps( return_dct )
+    # pickle_dmp = pickle.dumps( item_list )
+    # log.debug( 'pickle_dmp, ```%s```' % pickle_dmp )
+    print( pickle_dmp )  # THIS outputs the data back to python3
     return
 
 
