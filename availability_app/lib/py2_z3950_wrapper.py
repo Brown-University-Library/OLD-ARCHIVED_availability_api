@@ -84,7 +84,7 @@ class Searcher( object ):
             items.append( result_dct )
             pickle_dmp = pickle.dumps( items )
             log.debug( 'type(pickle_dmp), ```%s```' % type(pickle_dmp) )
-            print pickle_dmp
+            # print pickle_dmp
             return pickle_dmp
         except Exception as e:
             self.close_connection()
@@ -177,15 +177,29 @@ class Searcher( object ):
 
     def add_holdings_data( self, result ):
         """ Extracts holdings data if available.
-            Called by process_resultset() """
+            Called by search() """
+        holdings_data = []
         try:
             holdings_record_data = result.data.holdingsData
-            log.debug( 'holdings_record_data, ```%s```' % holdings_record_data )
             holdings_data = self.process_holdings_data( holdings_record_data )
         except Exception as e:
             log.warning( 'error trying to read holdings data, ```{}```'.format(unicode(repr(e))) )
-            holdings_data = []
+        log.debug( 'returning holdings_data' )
         return holdings_data
+
+    def process_holdings_data( self, holdings_data ):
+        """ Pulls out callnumber, location, and public_note.
+            Called by add_holdings_data() """
+        record_holdings_data = []
+        for holdings_entry in holdings_data:
+            entry = {}
+            holdings_object = holdings_entry[1]
+            entry[u'callNumber'] = holdings_object.callNumber
+            entry[u'localLocation'] = holdings_object.localLocation
+            entry[u'publicNote'] = holdings_object.publicNote
+            record_holdings_data.append( entry )
+        log.debug( 'pprint.pformat(record_holdings_data), `%s`' % pprint.pformat(record_holdings_data) )
+        return record_holdings_data
 
     def close_connection( self ):
         """ Closes connection.
@@ -210,8 +224,8 @@ def query_josiah( key, value, show_marc_param ):
         'response_timestamp': unicode(datetime.datetime.now())
     }
     log.debug( 'return_dct, ```%s```' % pprint.pformat(return_dct) )
-    # return return_dct
-    return 'foo'
+    print( return_dct )  # THIS outputs the data back to python3
+    return
 
 
 if __name__ == '__main__':
@@ -332,20 +346,6 @@ if __name__ == '__main__':
     #     return item_list
 
     # ## ...end for process_resultset() ##
-
-    # def process_holdings_data( self, holdings_data ):
-    #     """ Pulls out callnumber, location, and public_note.
-    #         Called by add_holdings_data() """
-    #     record_holdings_data = []
-    #     for holdings_entry in holdings_data:
-    #         entry = {}
-    #         holdings_object = holdings_entry[1]
-    #         entry[u'callNumber'] = holdings_object.callNumber
-    #         entry[u'localLocation'] = holdings_object.localLocation
-    #         entry[u'publicNote'] = holdings_object.publicNote
-    #         record_holdings_data.append( entry )
-    #     log.debug( 'pprint.pformat(record_holdings_data), `%s`' % pprint.pformat(record_holdings_data) )
-    #     return record_holdings_data
 
     # ## for process_marc_data()... ##
 
