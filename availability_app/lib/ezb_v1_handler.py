@@ -4,7 +4,8 @@
 Helper for views.handler()
 """
 
-import datetime, logging, os, pprint, subprocess
+import datetime, json, logging, os, pickle, pprint, subprocess
+import pymarc
 from availability_app import settings_app
 
 log = logging.getLogger(__name__)
@@ -42,11 +43,16 @@ class EzbV1Helper( object ):
         rq_now = datetime.datetime.now()
         data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
+        assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
+        log.debug( 'type(pickled_data), ```%s```' % type(pickled_data) )
+        # json.loads( pickled_data )
+        unpickled_data = pickle.loads( pickled_data )
+        # log.debug( 'unpickled_data, ```%s```' % unpickled_data )
         return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
         """ Perform actual query.
-            Called by self.build_response_dict(). """
+            Called by self.build_data_dct(). """
         log.debug( 'starting query_josiah()' )
         cmd_1 = 'cd %s' % ( settings_app.CMD_START_DIR_PATH )
         cmd_2 = 'source %s/activate' % ( settings_app.CMD_ENV_BIN_DIR_PATH )
