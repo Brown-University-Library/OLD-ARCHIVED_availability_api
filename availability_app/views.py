@@ -38,7 +38,7 @@ def ezb_v1( request, id_type, id_value ):
     if not validation == 'good':
         data_dct = { 'query': query, u'response': {u'error': validation} }
     else:
-        data_dct = ezb1_helper.build_data_dct( id_type, id_value, request.GET.get('show_marc', '') )
+        data_dct = ezb1_helper.build_data_dct( id_type, id_value, request.GET.get('show_marc', ''), request )
     jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
