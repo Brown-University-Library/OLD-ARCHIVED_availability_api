@@ -52,6 +52,7 @@ class EzbV1Helper( object ):
         cmd_2 = 'source %s/activate' % ( settings_app.CMD_ENV_BIN_DIR_PATH )
         cmd_3 = '%s/python2 %s/py2_z3950_wrapper.py --key %s --value %s' % ( settings_app.CMD_ENV_BIN_DIR_PATH, settings_app.CMD_WRAPPER_DIR_PATH, key, value )
         py3_cmd = cmd_1 + '; ' + cmd_2 + '; ' + cmd_3
+        log.debug( 'py3_cmd, ```%s```' % py3_cmd )
         process = subprocess.Popen( py3_cmd, shell=True, stdout=subprocess.PIPE )
         output, error = process.communicate()  # receive output from the python2 script
         log.debug( 'output, ```%s```; error, ```%s```' % (output, error) )
