@@ -16,7 +16,8 @@ class EzbV1Helper( object ):
 
     def __init__( self ):
         log.debug( 'initializing helper' )
-        self.legit_services = [ 'isbn', 'oclc' ]
+        # self.legit_services = [ 'isbn', 'oclc' ]
+        self.legit_services = [ 'bib', 'isbn', 'oclc' ]
         self.parser = Parser()
         self.ezb_requestable_locations = None
         self.ezb_requestable_statuses = None
