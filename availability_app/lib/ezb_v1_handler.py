@@ -18,47 +18,8 @@ class EzbV1Helper( object ):
         log.debug( 'initializing helper' )
         self.legit_services = [ 'isbn', 'oclc' ]
         self.parser = Parser()
-        self.ezb_requestable_locations = self.prep_ezb_requestable_locations()
-        self.ezb_requestable_statuses = self.prep_ezb_requestable_statuses()
-
-    def prep_ezb_requestable_locations( self ):
-        """ Populates ezb_requestable_locations.
-            Called by __init__()
-            TODO: load from editable admin-db. """
-        ezb_requestable_locations = [
-            'ANNEX',
-            'ORWIG STORAGE',
-            'ORWIG',
-            'ROCK CHINESE',
-            'ROCK JAPANESE',
-            'ROCK KOREAN',
-            'ROCK STORAGE CUTTER',
-            'ROCK STORAGE FARMINGTON',
-            'ROCK STORAGE STAR',
-            'ROCK STORAGE TEXTBOOKS',
-            'ROCK STORAGE THESES',
-            'ROCK STORAGE',
-            'ROCK',
-            'SCI THESES'
-            'SCI',
-        ]
-        log.debug( 'ezb_requestable_locations, ```%s```' % ezb_requestable_locations )
-        self.ezb_requestable_locations = ezb_requestable_locations
-        return
-
-    def prep_ezb_requestable_statuses( self ):
-        """ Populates ezb_requestable_statuses.
-            Called by __init__()
-            TODO: load from editable admin-db. """
-        ezb_requestable_statuses = [
-            'AVAILABLE',
-            'NEW BOOKS',
-            'USE IN LIBRARY',
-            'ASK AT CIRC',
-        ]
-        log.debug( 'ezb_requestable_statuses, ```%s```' % ezb_requestable_statuses )
-        self.ezb_requestable_statuses = ezb_requestable_statuses
-        return
+        self.ezb_requestable_locations = None
+        self.ezb_requestable_statuses = None
 
     def validate( self, key, value ):
         """ Stub for validation. IP checking another possibility.
@@ -174,6 +135,8 @@ class EzbV1Helper( object ):
     def determine_ezb_requestability( self, sierra_holdings ):
         """ Returns boolean for easyBorrow requestability.
             Called by build_summary_dct() """
+        self.prep_ezb_requestable_locations()
+        self.prep_ezb_requestable_statuses()
         requestable_bibs = []
         for item in sierra_holdings:
             log.debug( 'self.ezb_requestable_locations down here, ```%s```' % self.ezb_requestable_locations )
@@ -188,6 +151,45 @@ class EzbV1Helper( object ):
                     break
         log.debug( 'requestable_bibs, ```%s```' % pprint.pformat(requestable_bibs) )
         return requestable_bibs
+
+    def prep_ezb_requestable_locations( self ):
+        """ Populates ezb_requestable_locations.
+            Called by __init__()
+            TODO: load from editable admin-db. """
+        ezb_requestable_locations = [
+            'ANNEX',
+            'ORWIG STORAGE',
+            'ORWIG',
+            'ROCK CHINESE',
+            'ROCK JAPANESE',
+            'ROCK KOREAN',
+            'ROCK STORAGE CUTTER',
+            'ROCK STORAGE FARMINGTON',
+            'ROCK STORAGE STAR',
+            'ROCK STORAGE TEXTBOOKS',
+            'ROCK STORAGE THESES',
+            'ROCK STORAGE',
+            'ROCK',
+            'SCI THESES'
+            'SCI',
+        ]
+        log.debug( 'ezb_requestable_locations, ```%s```' % ezb_requestable_locations )
+        self.ezb_requestable_locations = ezb_requestable_locations
+        return
+
+    def prep_ezb_requestable_statuses( self ):
+        """ Populates ezb_requestable_statuses.
+            Called by __init__()
+            TODO: load from editable admin-db. """
+        ezb_requestable_statuses = [
+            'AVAILABLE',
+            'NEW BOOKS',
+            'USE IN LIBRARY',
+            'ASK AT CIRC',
+        ]
+        log.debug( 'ezb_requestable_statuses, ```%s```' % ezb_requestable_statuses )
+        self.ezb_requestable_statuses = ezb_requestable_statuses
+        return
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
