@@ -33,12 +33,13 @@ class EzbV1Helper( object ):
         """ Manager for z39.50 query, and result-processor.
             Called by views.ezb_v1(). """
         rq_now = datetime.datetime.now()
-        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {} }
+        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'sierra': 'init', 'summary': 'init'} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
         unpickled_data = pickle.loads( pickled_data )
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
-        data_dct['response'] = self.build_response_dict( unpickled_data )
+        data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
+        data_dct['response']['summary'] = self.build_summary_dct( unpickled_data )
         return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
@@ -66,7 +67,7 @@ class EzbV1Helper( object ):
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    def build_response_dict( self, unpickled_dct ):
+    def build_holdings_dct( self, unpickled_dct ):
         """ Processes z3950 data into response.
             Called by build_data_dct() """
         items = []
@@ -116,6 +117,11 @@ class EzbV1Helper( object ):
         log.debug( 'items, ```%s```' % items )
         return items
 
+    def build_summary_dct( self, unpickled_data ):
+        """ Builds simple summary data.
+            Called by build_data_dct() """
+        return { 'a': 'b', 'c': 'd' }
+
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
     #         Called by availability_service.availability_app.handler(). """
@@ -140,7 +146,7 @@ class Parser( object ):
 
     def make_bibid( self, pymrc_rcrd ):
         """ Parses bib.
-            Called by EzbV1Helper.build_response_dict()
+            Called by EzbV1Helper.build_holdings_dct()
             TODO: try record-get_field() method; should be quicker. """
         marc_dict = pymrc_rcrd.as_dict()
         bibid = 'bibid_not_available'
