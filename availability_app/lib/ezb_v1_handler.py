@@ -77,7 +77,7 @@ class EzbV1Helper( object ):
             log.debug( 'pymrc_obj.as_dict(), ```%s```' % pprint.pformat(pymrc_obj.as_dict()) )
             holdings = z_item['holdings_data']
             #
-            log.debug( 'bib?, ```%s```' % pymrc_obj.get_fields('907')[0].format_field() )
+            # log.debug( 'bib?, ```%s```' % pymrc_obj.get_fields('907')[0].format_field() )
             #
             notes_val = []
             notes = pymrc_obj.notes()
@@ -100,7 +100,7 @@ class EzbV1Helper( object ):
                 subjects_val.append( subject.format_field() )
             #
             item_dct = {
-                'bib': self.parser.make_bibid( pymrc_obj ),
+                'bib': self.parser.grab_bib( pymrc_obj ),
                 'author': pymrc_obj.author(),
                 'isbn': pymrc_obj.isbn(),
                 'location': pymrc_obj.location(),
@@ -144,23 +144,45 @@ class Parser( object ):
     def __init__( self ):
         pass
 
-    def make_bibid( self, pymrc_rcrd ):
+    def grab_bib( self, pymrc_rcrd ):
         """ Parses bib.
-            Called by EzbV1Helper.build_holdings_dct()
-            TODO: try record-get_field() method; should be quicker. """
-        marc_dict = pymrc_rcrd.as_dict()
-        bibid = 'bibid_not_available'
-        for field in marc_dict['fields']:
-            ( key, val ) = list( field.items() )[0]
-            if key == '907':
-                for subfield in field[key][u'subfields']:
-                    ( key2, val2 ) = list( subfield.items() )[0]
-                    if key2 == 'a':
-                        bibid = val2
-                        break
-        bibid = bibid.replace( '.', '' )
-        log.debug( 'bibid, `%s`' % bibid )
-        return bibid
+            Called by EzbV1Helper.build_holdings_dct() """
+        try:
+            bib = pymrc_rcrd['907']['a']
+            bib = bib[1:-1]  # removes initial '.', and ending check-digit
+        except AttributeError as e:
+            log.warning( 'exception getting bib, ```%s```' % e )
+            bib = None
+        log.debug( 'bib, `%s`' % bib )
+        return bib
+
+    # def make_bibid( self, pymrc_rcrd ):
+    #     """ Parses bib.
+    #         Called by EzbV1Helper.build_holdings_dct()
+    #         TODO: try record-get_field() method; should be quicker. """
+    #     marc_dict = pymrc_rcrd.as_dict()
+    #     bibid = 'bibid_not_available'
+    #     for field in marc_dict['fields']:
+    #         ( key, val ) = list( field.items() )[0]
+    #         if key == '907':
+    #             for subfield in field[key][u'subfields']:
+    #                 ( key2, val2 ) = list( subfield.items() )[0]
+    #                 if key2 == 'a':
+    #                     bibid = val2
+    #                     break
+    #     bibid = bibid.replace( '.', '' )
+    #     log.debug( 'bibid, `%s`' % bibid )
+    #     return bibid
 
     ## end Parser()
+
+
+        try:
+            return record['907']['a'][1:-1]
+        except AttributeError:
+            # try other fields for id?
+            #sys.stderr.write("\nNo value in ID field, leaving ID blank\n")
+            #record['id'] = ''
+            # if it has no id let's not include it
+            return
 
