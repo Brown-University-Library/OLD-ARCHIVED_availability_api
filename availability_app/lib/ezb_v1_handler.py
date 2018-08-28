@@ -124,11 +124,8 @@ class EzbV1Helper( object ):
     def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
             Called by build_data_dct() """
-        summary_dct = {
-            'title': None,
-            'ezb_requestable_bibs': []
-        }
-        summary_dct['title'] = sierra_holdings[0]['title']
+        summary_dct = { 'ezb_requestable_bibs': [] }
+        # summary_dct['title'] = sierra_holdings[0]['title']
         summary_dct['ezb_requestable_bibs'] = self.determine_ezb_requestability( sierra_holdings )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
@@ -140,15 +137,12 @@ class EzbV1Helper( object ):
         self.prep_ezb_requestable_statuses()
         requestable_bibs = []
         for item in sierra_holdings:
-            log.debug( 'self.ezb_requestable_locations down here, ```%s```' % self.ezb_requestable_locations )
-            log.debug( 'self.ezb_requestable_statuses down here, ```%s```' % self.ezb_requestable_statuses )
-
-            log.debug( 'here01')
             for holding_info in item['holdings']:
-                log.debug( 'here02' )
                 if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
-                    requestable_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
-                    log.debug( 'here03' )
+                    # requestable_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
+                    requestable_bibs.append( {
+                        'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib']
+                        } )
                     break
         log.debug( 'requestable_bibs, ```%s```' % pprint.pformat(requestable_bibs) )
         return requestable_bibs
@@ -245,14 +239,3 @@ class Parser( object ):
     #     return bibid
 
     ## end Parser()
-
-
-        try:
-            return record['907']['a'][1:-1]
-        except AttributeError:
-            # try other fields for id?
-            #sys.stderr.write("\nNo value in ID field, leaving ID blank\n")
-            #record['id'] = ''
-            # if it has no id let's not include it
-            return
-
