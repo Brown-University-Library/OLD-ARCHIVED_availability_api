@@ -39,7 +39,7 @@ class EzbV1Helper( object ):
         unpickled_data = pickle.loads( pickled_data )
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
         data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
-        data_dct['response']['summary'] = self.build_summary_dct( unpickled_data )
+        data_dct['response']['summary'] = self.build_summary_dct( data_dct['response']['sierra'] )
         return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
@@ -117,10 +117,16 @@ class EzbV1Helper( object ):
         log.debug( 'items, ```%s```' % items )
         return items
 
-    def build_summary_dct( self, unpickled_data ):
+    def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
             Called by build_data_dct() """
-        return { 'a': 'b', 'c': 'd' }
+        summary_dct = {
+            'title': None,
+            'ezb_requestable_bibs': []
+        }
+        summary_dct['title'] = sierra_holdings[0]['title']
+        log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
+        return summary_dct
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
