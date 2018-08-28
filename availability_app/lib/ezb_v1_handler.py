@@ -15,8 +15,50 @@ class EzbV1Helper( object ):
     """ Helper for v1 api route. """
 
     def __init__( self ):
+        log.debug( 'initializing helper' )
         self.legit_services = [ 'isbn', 'oclc' ]
         self.parser = Parser()
+        self.ezb_requestable_locations = self.prep_ezb_requestable_locations()
+        self.ezb_requestable_statuses = self.prep_ezb_requestable_statuses()
+
+    def prep_ezb_requestable_locations( self ):
+        """ Populates ezb_requestable_locations.
+            Called by __init__()
+            TODO: load from editable admin-db. """
+        ezb_requestable_locations = [
+            'ANNEX',
+            'ORWIG STORAGE',
+            'ORWIG',
+            'ROCK CHINESE',
+            'ROCK JAPANESE',
+            'ROCK KOREAN',
+            'ROCK STORAGE CUTTER',
+            'ROCK STORAGE FARMINGTON',
+            'ROCK STORAGE STAR',
+            'ROCK STORAGE TEXTBOOKS',
+            'ROCK STORAGE THESES',
+            'ROCK STORAGE',
+            'ROCK',
+            'SCI THESES'
+            'SCI',
+        ]
+        log.debug( 'ezb_requestable_locations, ```%s```' % ezb_requestable_locations )
+        self.ezb_requestable_locations = ezb_requestable_locations
+        return
+
+    def prep_ezb_requestable_statuses( self ):
+        """ Populates ezb_requestable_statuses.
+            Called by __init__()
+            TODO: load from editable admin-db. """
+        ezb_requestable_statuses = [
+            'AVAILABLE',
+            'NEW BOOKS',
+            'USE IN LIBRARY',
+            'ASK AT CIRC',
+        ]
+        log.debug( 'ezb_requestable_statuses, ```%s```' % ezb_requestable_statuses )
+        self.ezb_requestable_statuses = ezb_requestable_statuses
+        return
 
     def validate( self, key, value ):
         """ Stub for validation. IP checking another possibility.
@@ -33,13 +75,13 @@ class EzbV1Helper( object ):
         """ Manager for z39.50 query, and result-processor.
             Called by views.ezb_v1(). """
         rq_now = datetime.datetime.now()
-        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'sierra': 'init', 'summary': 'init'} }
+        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init'} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
         unpickled_data = pickle.loads( pickled_data )
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
         data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
-        data_dct['response']['summary'] = self.build_summary_dct( data_dct['response']['sierra'] )
+        data_dct['response']['basics'] = self.build_summary_dct( data_dct['response']['sierra'] )
         return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
@@ -125,8 +167,27 @@ class EzbV1Helper( object ):
             'ezb_requestable_bibs': []
         }
         summary_dct['title'] = sierra_holdings[0]['title']
+        summary_dct['ezb_requestable_bibs'] = self.determine_ezb_requestability( sierra_holdings )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
+
+    def determine_ezb_requestability( self, sierra_holdings ):
+        """ Returns boolean for easyBorrow requestability.
+            Called by build_summary_dct() """
+        requestable_bibs = []
+        for item in sierra_holdings:
+            log.debug( 'self.ezb_requestable_locations down here, ```%s```' % self.ezb_requestable_locations )
+            log.debug( 'self.ezb_requestable_statuses down here, ```%s```' % self.ezb_requestable_statuses )
+
+            log.debug( 'here01')
+            for holding_info in item['holdings']:
+                log.debug( 'here02' )
+                if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
+                    requestable_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
+                    log.debug( 'here03' )
+                    break
+        log.debug( 'requestable_bibs, ```%s```' % pprint.pformat(requestable_bibs) )
+        return requestable_bibs
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
