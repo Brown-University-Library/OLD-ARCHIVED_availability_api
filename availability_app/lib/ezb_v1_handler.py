@@ -38,15 +38,13 @@ class EzbV1Helper( object ):
         return message
 
     def build_data_dct( self, key, value, show_marc_param, request ):
-        """ Handler for cached z39.50 call and response.
+        """ Manager for z39.50 query, and result-processor.
             Called by views.ezb_v1(). """
         rq_now = datetime.datetime.now()
         data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
-        # json.loads( pickled_data )
         unpickled_data = pickle.loads( pickled_data )
-        log.debug( 'type(unpickled_data), `%s`' % type(unpickled_data) )
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
         data_dct['response'] = self.build_response_dict( unpickled_data )
         return data_dct
@@ -86,7 +84,6 @@ class EzbV1Helper( object ):
             log.debug( 'pymrc_obj.__dict__, ```%s```' % pprint.pformat(pymrc_obj.__dict__) )
             holdings = z_item['holdings_data']
             item_dct = { 'title': pymrc_obj.title(), 'holdings': holdings }
-            # log.debug( 'item_dct, ```%s```' % pprint.pformat(item_dct) )
             items.append( item_dct )
         log.debug( 'items, ```%s```' % items )
         return items
