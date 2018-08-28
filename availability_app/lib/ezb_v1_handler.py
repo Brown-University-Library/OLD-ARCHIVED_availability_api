@@ -76,19 +76,33 @@ class EzbV1Helper( object ):
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-
     def build_response_dict( self, unpickled_dct ):
         """ Processes z3950 data into response.
             Called by build_data_dct() """
         items = []
         z_items = unpickled_dct['backend_response']
-        for z_item in z_items:
+        for ( i, z_item ) in enumerate( z_items ):
             pymrc_obj = z_item['pymarc_obj']
-            pymrc_dct = pymrc_obj.as_dict()
-            log.debug( 'pymrc_dct, ```%s```' % pprint.pformat(pymrc_dct) )
-            items.append( pymrc_dct )
+            log.debug( 'pymrc_obj.__dict__, ```%s```' % pprint.pformat(pymrc_obj.__dict__) )
+            holdings = z_item['holdings_data']
+            item_dct = { 'title': pymrc_obj.title(), 'holdings': holdings }
+            # log.debug( 'item_dct, ```%s```' % pprint.pformat(item_dct) )
+            items.append( item_dct )
         log.debug( 'items, ```%s```' % items )
         return items
+
+    # def build_response_dict( self, unpickled_dct ):
+    #     """ Processes z3950 data into response.
+    #         Called by build_data_dct() """
+    #     items = []
+    #     z_items = unpickled_dct['backend_response']
+    #     for z_item in z_items:
+    #         pymrc_obj = z_item['pymarc_obj']
+    #         pymrc_dct = pymrc_obj.as_dict()
+    #         log.debug( 'pymrc_dct, ```%s```' % pprint.pformat(pymrc_dct) )
+    #         items.append( pymrc_dct )
+    #     log.debug( 'items, ```%s```' % items )
+    #     return items
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
