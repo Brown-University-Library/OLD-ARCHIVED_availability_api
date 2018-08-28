@@ -44,10 +44,11 @@ class EzbV1Helper( object ):
         data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
-        log.debug( 'type(pickled_data), ```%s```' % type(pickled_data) )
         # json.loads( pickled_data )
         unpickled_data = pickle.loads( pickled_data )
-        # log.debug( 'unpickled_data, ```%s```' % unpickled_data )
+        log.debug( 'type(unpickled_data), `%s`' % type(unpickled_data) )
+        log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
+        data_dct['response'] = self.build_response_dict( unpickled_data )
         return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
@@ -75,18 +76,19 @@ class EzbV1Helper( object ):
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    # def build_query_dict( self, url, key, value, show_marc_param ):
-    #     """ Query reflector.
-    #         Called by availability_service.availability_app.handler(). """
-    #     start_time = datetime.datetime.now()
-    #     query_dict = {
-    #         u'url': url,
-    #         u'query_timestamp': str(start_time),
-    #         u'query_key': key,
-    #         u'query_value': value, }
-    #     if show_marc_param == u'true':
-    #         query_dict[u'show_marc'] = show_marc_param
-    #     return query_dict
+
+    def build_response_dict( self, unpickled_dct ):
+        """ Processes z3950 data into response.
+            Called by build_data_dct() """
+        items = []
+        z_items = unpickled_dct['backend_response']
+        for z_item in z_items:
+            pymrc_obj = z_item['pymarc_obj']
+            pymrc_dct = pymrc_obj.as_dict()
+            log.debug( 'pymrc_dct, ```%s```' % pprint.pformat(pymrc_dct) )
+            items.append( pymrc_dct )
+        log.debug( 'items, ```%s```' % items )
+        return items
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
@@ -101,20 +103,4 @@ class EzbV1Helper( object ):
     #         cache.set( cache_key, response_dict )
     #     return response_dict
 
-
-    # def query_josiah( self, key, value, show_marc_param ):
-    #     """ Perform actual query.
-    #         Called by self.build_response_dict(). """
-    #     marc_flag = True if show_marc_param == u'true' else False
-    #     srchr = z3950_wrapper.Searcher(
-    #         HOST=self.HOST, PORT=self.PORT, DB_NAME=self.DB_NAME, connect_flag=True
-    #         )
-    #     item_list = srchr.search( key, value, marc_flag )
-    #     srchr.close_connection()
-    #     return {
-    #         u'backend_response': item_list,
-    #         u'response_timestamp': unicode(datetime.datetime.now()) }
-
-
-
-    # end class HandlerHelper
+    ## end class EzbV1Helper()
