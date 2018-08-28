@@ -12,19 +12,11 @@ log = logging.getLogger(__name__)
 
 
 class EzbV1Helper( object ):
-    """ Helpers for main api route: availability_service.availability_app.handler() """
-
-    # def __init__( self, z_host, z_port, z_type ):
-    #     # self.log = log
-    #     self.HOST = z_host
-    #     self.PORT = z_port
-    #     self.DB_NAME = z_type
-    #     self.legit_services = [ u'bib', u'isbn', u'issn', u'oclc' ]  # will enhance; possible TODO: load from yaml config file
-    #     # self.cache_dir = os.getenv( u'availability_CACHE_DIR' )
-    #     # self.cache_minutes = int( os.getenv(u'availability_CACHE_MINUTES') ) * 60  # timeout param requires seconds
+    """ Helper for v1 api route. """
 
     def __init__( self ):
         self.legit_services = [ 'isbn', 'oclc' ]
+        self.parser = Parser()
 
     def validate( self, key, value ):
         """ Stub for validation. IP checking another possibility.
@@ -79,27 +71,50 @@ class EzbV1Helper( object ):
             Called by build_data_dct() """
         items = []
         z_items = unpickled_dct['backend_response']
-        for ( i, z_item ) in enumerate( z_items ):
+        for z_item in z_items:
             pymrc_obj = z_item['pymarc_obj']
-            log.debug( 'pymrc_obj.__dict__, ```%s```' % pprint.pformat(pymrc_obj.__dict__) )
+            log.debug( 'pymrc_obj.as_dict(), ```%s```' % pprint.pformat(pymrc_obj.as_dict()) )
             holdings = z_item['holdings_data']
-            item_dct = { 'title': pymrc_obj.title(), 'holdings': holdings }
+            #
+            log.debug( 'bib?, ```%s```' % pymrc_obj.get_fields('907')[0].format_field() )
+            #
+            notes_val = []
+            notes = pymrc_obj.notes()
+            for note in notes:
+                notes_val.append( note.format_field() )
+            #
+            phys_desc_val = []
+            physicaldescriptions = pymrc_obj.physicaldescription()
+            for phys_desc in physicaldescriptions:
+                phys_desc_val.append( phys_desc.format_field() )
+            #
+            series_val = []
+            series_entries = pymrc_obj.series()
+            for series in series_entries:
+                series_val.append( series.format_field() )
+            #
+            subjects_val = []
+            subjects = pymrc_obj.subjects()
+            for subject in subjects:
+                subjects_val.append( subject.format_field() )
+            #
+            item_dct = {
+                'bib': self.parser.make_bibid( pymrc_obj ),
+                'author': pymrc_obj.author(),
+                'isbn': pymrc_obj.isbn(),
+                'location': pymrc_obj.location(),
+                'notes': notes_val,
+                'physicaldescription': phys_desc_val,
+                'publisher': pymrc_obj.publisher(),
+                'pubyear': pymrc_obj.pubyear(),
+                'series': series_val,
+                'subjects': subjects_val,
+                'title': pymrc_obj.title(),
+                'uniformtitle': pymrc_obj.uniformtitle(),
+                'holdings': holdings }
             items.append( item_dct )
         log.debug( 'items, ```%s```' % items )
         return items
-
-    # def build_response_dict( self, unpickled_dct ):
-    #     """ Processes z3950 data into response.
-    #         Called by build_data_dct() """
-    #     items = []
-    #     z_items = unpickled_dct['backend_response']
-    #     for z_item in z_items:
-    #         pymrc_obj = z_item['pymarc_obj']
-    #         pymrc_dct = pymrc_obj.as_dict()
-    #         log.debug( 'pymrc_dct, ```%s```' % pprint.pformat(pymrc_dct) )
-    #         items.append( pymrc_dct )
-    #     log.debug( 'items, ```%s```' % items )
-    #     return items
 
     # def build_response_dict( self, key, value, show_marc_param ):
     #     """ Handler for cached z39.50 call and response.
@@ -114,4 +129,32 @@ class EzbV1Helper( object ):
     #         cache.set( cache_key, response_dict )
     #     return response_dict
 
-    ## end class EzbV1Helper()
+    ## end EzbV1Helper()
+
+
+class Parser( object ):
+    """ Parses data from marc. """
+
+    def __init__( self ):
+        pass
+
+    def make_bibid( self, pymrc_rcrd ):
+        """ Parses bib.
+            Called by EzbV1Helper.build_response_dict()
+            TODO: try record-get_field() method; should be quicker. """
+        marc_dict = pymrc_rcrd.as_dict()
+        bibid = 'bibid_not_available'
+        for field in marc_dict['fields']:
+            ( key, val ) = list( field.items() )[0]
+            if key == '907':
+                for subfield in field[key][u'subfields']:
+                    ( key2, val2 ) = list( subfield.items() )[0]
+                    if key2 == 'a':
+                        bibid = val2
+                        break
+        bibid = bibid.replace( '.', '' )
+        log.debug( 'bibid, `%s`' % bibid )
+        return bibid
+
+    ## end Parser()
+

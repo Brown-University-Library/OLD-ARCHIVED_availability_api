@@ -75,13 +75,14 @@ class Searcher( object ):
             qstring = self.build_qstring( key, value )
             qobject = self.build_qobject( qstring )
             resultset = self.connection.search( qobject )
-            # import pickle
+            log.debug( 'resultset, ```%s```' % resultset )
+            log.debug( 'len(resultset), `%s`' % len(resultset) )
             items = []
             for result in resultset:
                 result_dct = { 'pymarc_obj': None, 'holdings_data': None }
                 result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
                 result_dct['holdings_data'] = self.add_holdings_data( result )
-            items.append( result_dct )
+                items.append( result_dct )
             log.debug( 'len(items), `%s`; items, %s' % (len(items), pprint.pformat(items)) )
             return items
         except Exception as e:
