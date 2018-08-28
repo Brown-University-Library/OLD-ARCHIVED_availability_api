@@ -36,13 +36,14 @@ class EzbV1Helper( object ):
         """ Manager for z39.50 query, and result-processor.
             Called by views.ezb_v1(). """
         rq_now = datetime.datetime.now()
-        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init'} }
+        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init', 'time_taken': 'init'} }
         pickled_data = self.query_josiah( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
         unpickled_data = pickle.loads( pickled_data )
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
         data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
         data_dct['response']['basics'] = self.build_summary_dct( data_dct['response']['sierra'] )
+        data_dct['response']['time_taken'] = str( datetime.datetime.now() - rq_now )
         return data_dct
 
     def query_josiah( self, key, value, show_marc_param ):
