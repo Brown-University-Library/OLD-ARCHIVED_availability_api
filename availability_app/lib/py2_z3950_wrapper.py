@@ -80,9 +80,15 @@ class Searcher( object ):
             items = []
             for result in resultset:
                 result_dct = { 'pymarc_obj': None, 'holdings_data': None }
-                result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
-                result_dct['holdings_data'] = self.add_holdings_data( result )
-                items.append( result_dct )
+                result_dct['pymarc_obj'] = None
+                # result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
+                try:
+                    result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
+                    result_dct['holdings_data'] = self.add_holdings_data( result )
+                    items.append( result_dct )
+                except AttributeError as e:
+                    log.warning( 'exception getting bibliographicRecord, ```%s```' % unicode(repr(e)) )
+                    pass
             log.debug( 'len(items), `%s`; items, %s' % (len(items), pprint.pformat(items)) )
             return items
         except Exception as e:
@@ -99,38 +105,22 @@ class Searcher( object ):
     #         qstring = self.build_qstring( key, value )
     #         qobject = self.build_qobject( qstring )
     #         resultset = self.connection.search( qobject )
+    #         log.debug( 'resultset, ```%s```' % resultset )
+    #         log.debug( 'len(resultset), `%s`' % len(resultset) )
     #         items = []
     #         for result in resultset:
-    #             item_dct = {}
-    #             marc_record_object = Record( data=result.data.bibliographicRecord.encoding[1] )
-    #             marc_dct = marc_record_object.as_dict()
-    #             item_dct['marc_dct'] = marc_dct
-    #             item_dct['holdings_data'] = self.add_holdings_data( result )
-    #             items.append( item_dct )
-    #         log.debug( 'items, ```%s```' % pprint.pformat(items) )
-    #         jsn = json.dumps( items )
-    #         print jsn
-    #         return jsn
+    #             result_dct = { 'pymarc_obj': None, 'holdings_data': None }
+    #             result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
+    #             result_dct['holdings_data'] = self.add_holdings_data( result )
+    #             items.append( result_dct )
+    #         log.debug( 'len(items), `%s`; items, %s' % (len(items), pprint.pformat(items)) )
+    #         return items
     #     except Exception as e:
     #         self.close_connection()
-    #         error_dict = self.make_error_dict()
-    #         self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
-
-    # def search( self, key, value, marc_flag=False ):
-    #     """ Convenience function.
-    #         Called by utils.app_helper.HandlerHelper.query_josiah() """
-    #     try:
-    #         qstring = self.build_qstring( key, value )
-    #         qobject = self.build_qobject( qstring )
-    #         resultset = self.connection.search( qobject )
-    #         # return resultset
-    #         # self.inspect_resultset( resultset )  # for debugging
-    #         item_list = self.process_resultset( resultset, marc_flag )  # marc_flag typically False
-    #         return item_list
-    #     except Exception as e:
-    #         self.close_connection()
-    #         error_dict = self.make_error_dict()
-    #         self.logger.error( u'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+    #         message = 'exception, ```%s```' % unicode(repr(e))
+    #         # error_dict = self.make_error_dict()
+    #         # log.error( 'in z3950_wrapper.Searcher.search(); error-info, `%s`' % pprint.pformat(error_dict) )
+    #         log.error( message )
 
     def build_qstring( self, key, value ):
         """ Builds an arcane querystring, like `@attr 1=7 9780521593700`.
