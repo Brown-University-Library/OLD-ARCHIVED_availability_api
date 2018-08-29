@@ -140,3 +140,5 @@ LOGGING = {
     }
 }
 
+## https://docs.djangoproject.com/en/1.11/topics/cache/
+CACHES = json.loads( os.environ['AVL_API__CACHES_JSON'] )
