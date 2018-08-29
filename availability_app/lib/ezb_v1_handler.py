@@ -158,9 +158,9 @@ class EzbV1Helper( object ):
     def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
             Called by build_data_dct() """
-        summary_dct = { 'ezb_requestable_bibs': [] }
+        summary_dct = { 'ezb_available_bibs': [] }
         # summary_dct['title'] = sierra_holdings[0]['title']
-        summary_dct['ezb_requestable_bibs'] = self.determine_ezb_requestability( sierra_holdings )
+        summary_dct['ezb_available_bibs'] = self.determine_ezb_requestability( sierra_holdings )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
 
@@ -169,17 +169,17 @@ class EzbV1Helper( object ):
             Called by build_summary_dct() """
         self.prep_ezb_requestable_locations()
         self.prep_ezb_requestable_statuses()
-        requestable_bibs = []
+        available_bibs = []
         for item in sierra_holdings:
             for holding_info in item['holdings']:
                 if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
-                    # requestable_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
-                    requestable_bibs.append( {
+                    # available_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
+                    available_bibs.append( {
                         'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib']
                         } )
                     break
-        log.debug( 'requestable_bibs, ```%s```' % pprint.pformat(requestable_bibs) )
-        return requestable_bibs
+        log.debug( 'available_bibs, ```%s```' % pprint.pformat(available_bibs) )
+        return available_bibs
 
     def prep_ezb_requestable_locations( self ):
         """ Populates ezb_requestable_locations.
