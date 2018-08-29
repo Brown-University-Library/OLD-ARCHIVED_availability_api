@@ -7,6 +7,7 @@ Helper for views.handler()
 import datetime, json, logging, os, pickle, pprint, subprocess
 import pymarc
 from availability_app import settings_app
+from django.core.cache import cache
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class EzbV1Helper( object ):
             Called by views.ezb_v1(). """
         rq_now = datetime.datetime.now()
         data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init', 'time_taken': 'init'} }
-        pickled_data = self.query_josiah( key, value, show_marc_param )
+        pickled_data = self.grab_z3950_data( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
         unpickled_data = pickle.loads( pickled_data )
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
@@ -47,9 +48,40 @@ class EzbV1Helper( object ):
         data_dct['response']['time_taken'] = str( datetime.datetime.now() - rq_now )
         return data_dct
 
+    # def build_data_dct( self, key, value, show_marc_param, request ):
+    #     """ Manager for z39.50 query, and result-processor.
+    #         Called by views.ezb_v1(). """
+    #     rq_now = datetime.datetime.now()
+    #     data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init', 'time_taken': 'init'} }
+    #     # pickled_data = self.query_josiah( key, value, show_marc_param )
+    #     pickled_data = cache.get( 'pickled_data_cached' )
+    #     if pickled_data is None:
+    #         log.debug( 'pickled_data was not cached; will query sierra' )
+    #         pickled_data = self.query_josiah( key, value, show_marc_param )
+    #         cache.set( 'pickled_data_cached', pickled_data )  # time could be last argument; defaults to settings.py entry
+    #     assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
+    #     unpickled_data = pickle.loads( pickled_data )
+    #     log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
+    #     data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
+    #     data_dct['response']['basics'] = self.build_summary_dct( data_dct['response']['sierra'] )
+    #     data_dct['response']['time_taken'] = str( datetime.datetime.now() - rq_now )
+    #     return data_dct
+
+    def grab_z3950_data( self, key, value, show_marc_param ):
+        """ Returns data from cache if available; otherwise calls sierra.
+            Called by build_data_dct() """
+        pickled_data = cache.get( 'pickled_data_cached' )
+        if pickled_data is None:
+            log.debug( 'pickled_data was not in cache' )
+            pickled_data = self.query_josiah( key, value, show_marc_param )
+            cache.set( 'pickled_data_cached', pickled_data )  # time could be last argument; defaults to settings.py entry
+        else:
+            log.debug( 'pickled_data was in cache' )
+        return pickled_data
+
     def query_josiah( self, key, value, show_marc_param ):
         """ Perform actual query.
-            Called by self.build_data_dct(). """
+            Called by grab_z3950_data(). """
         log.debug( 'starting query_josiah()' )
         cmd_1 = 'cd %s' % ( settings_app.CMD_START_DIR_PATH )
         cmd_2 = 'source %s/activate' % ( settings_app.CMD_ENV_BIN_DIR_PATH )
