@@ -53,12 +53,13 @@ class V1_UrlTest( TestCase ):
         self.assertTrue( 'Zen and the art of motorcycle maintenance' in content )
 
     def test_found_isbn_2(self):
-        """ Checks found isbn with multiple pymarc Records, one of which can't be read. """
+        """ Checks found isbn with multiple pymarc Records, two of which don't have bibliographic records. """
         response = self.client.get( '/v1/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_02) )  # project root part of url is assumed
         content = response.content.decode('utf-8')
         self.assertTrue( '"bib": "b2696893"' in content )
-        self.assertTrue( '"bib": "foo"' in content )
+        self.assertTrue( '"bib": "b2814930"' in content )
         self.assertTrue( 'Kongolese Saint Anthony' in content )
+        self.assertTrue( 'Africa and Africans' in content )
 
     # def test_invalid_key(self):
     #     """ Checks non 'isbn' or 'oclc' key. """
