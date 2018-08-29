@@ -70,11 +70,12 @@ class EzbV1Helper( object ):
     def grab_z3950_data( self, key, value, show_marc_param ):
         """ Returns data from cache if available; otherwise calls sierra.
             Called by build_data_dct() """
-        pickled_data = cache.get( 'pickled_data_cached' )
+        cache_key = '%s_%s' % (key, value)
+        pickled_data = cache.get( cache_key )
         if pickled_data is None:
             log.debug( 'pickled_data was not in cache' )
             pickled_data = self.query_josiah( key, value, show_marc_param )
-            cache.set( 'pickled_data_cached', pickled_data )  # time could be last argument; defaults to settings.py entry
+            cache.set( cache_key, pickled_data )  # time could be last argument; defaults to settings.py entry
         else:
             log.debug( 'pickled_data was in cache' )
         return pickled_data
