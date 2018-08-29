@@ -81,13 +81,12 @@ class Searcher( object ):
             for result in resultset:
                 result_dct = { 'pymarc_obj': None, 'holdings_data': None }
                 result_dct['pymarc_obj'] = None
-                # result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
                 try:
                     result_dct['pymarc_obj'] = Record( data=result.data.bibliographicRecord.encoding[1] )
                     result_dct['holdings_data'] = self.add_holdings_data( result )
                     items.append( result_dct )
                 except AttributeError as e:
-                    log.warning( 'exception getting bibliographicRecord, ```%s```' % unicode(repr(e)) )
+                    log.warning( 'exception getting bibliographicRecord, ```%s```, so skipping this record' % unicode(repr(e)) )  ## note: i considered still checking & returning the holdings, but decided against it because i need to be able to return a bib if something useful is found in a holdings entry.
                     pass
             log.debug( 'len(items), `%s`; items, %s' % (len(items), pprint.pformat(items)) )
             return items
