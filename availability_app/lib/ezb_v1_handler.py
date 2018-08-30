@@ -20,8 +20,8 @@ class EzbV1Helper( object ):
         # self.legit_services = [ 'isbn', 'oclc' ]
         self.legit_services = [ 'bib', 'isbn', 'oclc' ]
         self.parser = Parser()
-        self.ezb_requestable_locations = None
-        self.ezb_requestable_statuses = None
+        self.ezb_available_locations = None
+        self.ezb_available_statuses = None
 
     def validate( self, key, value ):
         """ Stub for validation. IP checking another possibility.
@@ -139,8 +139,8 @@ class EzbV1Helper( object ):
     def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
             Called by build_data_dct() """
-        self.prep_ezb_requestable_locations()
-        self.prep_ezb_requestable_statuses()
+        self.prep_ezb_available_locations()
+        self.prep_ezb_available_statuses()
         summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [], 'online_holdings': [] }
         summary_dct = self.determine_ezb_requestability( sierra_holdings, summary_dct )
         summary_dct = self.check_online_holdings( sierra_holdings, summary_dct )
@@ -153,7 +153,7 @@ class EzbV1Helper( object ):
         for item in sierra_holdings:
             item_available_holdings = []
             for holding_info in item['holdings']:
-                if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
+                if holding_info['localLocation'] in self.ezb_available_locations and holding_info['publicNote'] in self.ezb_available_statuses:
                     item_available_holdings.append( holding_info )
             if len( item_available_holdings ) > 0:
                 summary_dct['ezb_available_holdings'] = summary_dct['ezb_available_holdings'] + item_available_holdings
@@ -177,11 +177,11 @@ class EzbV1Helper( object ):
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
 
-    def prep_ezb_requestable_locations( self ):
-        """ Populates ezb_requestable_locations.
+    def prep_ezb_available_locations( self ):
+        """ Populates ezb_available_locations.
             Called by build_summary_dct()
             TODO: load from editable admin-db. """
-        ezb_requestable_locations = [
+        ezb_available_locations = [
             'ANNEX',
             'ORWIG STORAGE',
             'ORWIG',
@@ -198,22 +198,22 @@ class EzbV1Helper( object ):
             'SCI THESES'
             'SCI',
         ]
-        log.debug( 'ezb_requestable_locations, ```%s```' % ezb_requestable_locations )
-        self.ezb_requestable_locations = ezb_requestable_locations
+        log.debug( 'ezb_available_locations, ```%s```' % ezb_available_locations )
+        self.ezb_available_locations = ezb_available_locations
         return
 
-    def prep_ezb_requestable_statuses( self ):
-        """ Populates ezb_requestable_statuses.
+    def prep_ezb_available_statuses( self ):
+        """ Populates ezb_available_statuses.
             Called by build_summary_dct()
             TODO: load from editable admin-db. """
-        ezb_requestable_statuses = [
+        ezb_available_statuses = [
             'AVAILABLE',
             'NEW BOOKS',
             # 'USE IN LIBRARY',
             'ASK AT CIRC',
         ]
-        log.debug( 'ezb_requestable_statuses, ```%s```' % ezb_requestable_statuses )
-        self.ezb_requestable_statuses = ezb_requestable_statuses
+        log.debug( 'ezb_available_statuses, ```%s```' % ezb_available_statuses )
+        self.ezb_available_statuses = ezb_available_statuses
         return
 
     ## end EzbV1Helper()
