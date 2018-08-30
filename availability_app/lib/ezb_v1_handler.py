@@ -181,23 +181,8 @@ class EzbV1Helper( object ):
         """ Populates ezb_available_locations.
             Called by build_summary_dct()
             TODO: load from editable admin-db. """
-        ezb_available_locations = [
-            'ANNEX',
-            'ORWIG STORAGE',
-            'ORWIG',
-            'ROCK CHINESE',
-            'ROCK JAPANESE',
-            'ROCK KOREAN',
-            'ROCK STORAGE CUTTER',
-            'ROCK STORAGE FARMINGTON',
-            'ROCK STORAGE STAR',
-            'ROCK STORAGE TEXTBOOKS',
-            'ROCK STORAGE THESES',
-            'ROCK STORAGE',
-            'ROCK',
-            'SCI THESES'
-            'SCI',
-        ]
+        from availability_app.lib import locations_and_statuses
+        ezb_available_locations = locations_and_statuses.ezb_available_locations
         log.debug( 'ezb_available_locations, ```%s```' % ezb_available_locations )
         self.ezb_available_locations = ezb_available_locations
         return
@@ -206,13 +191,9 @@ class EzbV1Helper( object ):
         """ Populates ezb_available_statuses.
             Called by build_summary_dct()
             TODO: load from editable admin-db. """
-        ezb_available_statuses = [
-            'AVAILABLE',
-            'NEW BOOKS',
-            # 'USE IN LIBRARY',
-            'ASK AT CIRC',
-        ]
-        log.debug( 'ezb_available_statuses, ```%s```' % ezb_available_statuses )
+        from availability_app.lib import locations_and_statuses
+        ezb_available_statuses = locations_and_statuses.ezb_available_statuses
+        log.debug( 'zezb_available_statuses, ```%s```' % ezb_available_statuses )
         self.ezb_available_statuses = ezb_available_statuses
         return
 
