@@ -46,3 +46,18 @@ def ezb_v1( request, id_type, id_value ):
 def ezb_v2( request, id_type, id_value ):
     """ Handles upcoming easyborrow-api call. """
     return HttpResponse( 'ezb_v2_url handling coming' )
+
+
+def locations_and_statuses( request ):
+    """ Shows values being used. """
+    from availability_app.lib import locations_and_statuses
+    rq_now = datetime.datetime.now()
+    data_dct = {
+        'query': ezb1_helper.build_query_dict( request, rq_now ),
+        'response': {
+            'ezb_available_locations': locations_and_statuses.ezb_available_locations,
+            'ezb_available_statuses': locations_and_statuses.ezb_available_statuses,
+            'time_taken': str( datetime.datetime.now() - rq_now ) }
+    }
+    output = json.dumps( data_dct, sort_keys=True, indent=2 )
+    return HttpResponse( output, content_type='application/json; charset=utf-8' )

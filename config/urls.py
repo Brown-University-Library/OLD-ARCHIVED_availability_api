@@ -18,6 +18,8 @@ urlpatterns = [
 
     url( r'^v2/(?P<id_type>.*)/(?P<id_value>.*)/$',  avl_views.ezb_v2, name='ezb_v2_url' ),
 
+    url( r'^locations_and_statuses/$',  avl_views.locations_and_statuses, name='locations_and_statuses_url' ),
+
     url( r'^$',  RedirectView.as_view(pattern_name='info_url') ),
 
     ]
