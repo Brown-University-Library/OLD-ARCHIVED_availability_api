@@ -157,7 +157,7 @@ class EzbV1Helper( object ):
                     item_available_holdings.append( holding_info )
             if len( item_available_holdings ) > 0:
                 summary_dct['ezb_available_holdings'] = summary_dct['ezb_available_holdings'] + item_available_holdings
-                bib_dct = { 'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib'] }
+                bib_dct = { 'bib': item['bib'], 'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib'] }
                 summary_dct['ezb_available_bibs'].append( bib_dct )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
