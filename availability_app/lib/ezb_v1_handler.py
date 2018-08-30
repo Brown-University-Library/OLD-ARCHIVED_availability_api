@@ -136,32 +136,24 @@ class EzbV1Helper( object ):
         log.debug( 'items, ```%s```' % items )
         return items
 
-    # def build_summary_dct( self, sierra_holdings ):
-    #     """ Builds simple summary data.
-    #         Called by build_data_dct() """
-    #     summary_dct = { 'ezb_available_bibs': [] }
-    #     summary_dct['ezb_available_bibs'] = self.determine_ezb_requestability( sierra_holdings )
-    #     log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
-    #     return summary_dct
-
     def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
             Called by build_data_dct() """
-        summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [] }
+        self.prep_ezb_requestable_locations()
+        self.prep_ezb_requestable_statuses()
+        summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [], 'online_holdings': [] }
         summary_dct = self.determine_ezb_requestability( sierra_holdings, summary_dct )
+        summary_dct = self.check_online_holdings( sierra_holdings, summary_dct )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
 
     def determine_ezb_requestability( self, sierra_holdings, summary_dct ):
         """ Returns boolean for easyBorrow requestability.
             Called by build_summary_dct() """
-        self.prep_ezb_requestable_locations()
-        self.prep_ezb_requestable_statuses()
         for item in sierra_holdings:
             item_available_holdings = []
             for holding_info in item['holdings']:
                 if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
-                    # summary_dct['ezb_available_holdings'].append( holding_info )
                     item_available_holdings.append( holding_info )
             if len( item_available_holdings ) > 0:
                 summary_dct['ezb_available_holdings'] = summary_dct['ezb_available_holdings'] + item_available_holdings
@@ -170,26 +162,24 @@ class EzbV1Helper( object ):
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
 
-    # def determine_ezb_requestability( self, sierra_holdings ):
-    #     """ Returns boolean for easyBorrow requestability.
-    #         Called by build_summary_dct() """
-    #     self.prep_ezb_requestable_locations()
-    #     self.prep_ezb_requestable_statuses()
-    #     available_bibs = []
-    #     for item in sierra_holdings:
-    #         for holding_info in item['holdings']:
-    #             if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
-    #                 # available_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
-    #                 available_bibs.append( {
-    #                     'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib']
-    #                     } )
-    #                 break
-    #     log.debug( 'available_bibs, ```%s```' % pprint.pformat(available_bibs) )
-    #     return available_bibs
+        dict2 = dict1.copy()
+
+    def check_online_holdings( self, sierra_holdings, summary_dct ):
+        """ Adds any online holdings to the summary basics dct.
+            Called by: build_summary_dct() """
+        for item in sierra_holdings:
+            for holding_info in item['holdings']:
+                if 'online' in holding_info['localLocation'].lower():
+                    online_holding_info = holding_info.copy()
+                    online_holding_info['title'] = item['title']
+                    online_holding_info['url'] = 'https://search.library.brown.edu/catalog/%s' % item['bib']
+                    summary_dct['online_holdings'].append( online_holding_info )
+        log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
+        return summary_dct
 
     def prep_ezb_requestable_locations( self ):
         """ Populates ezb_requestable_locations.
-            Called by __init__()
+            Called by build_summary_dct()
             TODO: load from editable admin-db. """
         ezb_requestable_locations = [
             'ANNEX',
@@ -214,30 +204,17 @@ class EzbV1Helper( object ):
 
     def prep_ezb_requestable_statuses( self ):
         """ Populates ezb_requestable_statuses.
-            Called by __init__()
+            Called by build_summary_dct()
             TODO: load from editable admin-db. """
         ezb_requestable_statuses = [
             'AVAILABLE',
             'NEW BOOKS',
-            'USE IN LIBRARY',
+            # 'USE IN LIBRARY',
             'ASK AT CIRC',
         ]
         log.debug( 'ezb_requestable_statuses, ```%s```' % ezb_requestable_statuses )
         self.ezb_requestable_statuses = ezb_requestable_statuses
         return
-
-    # def build_response_dict( self, key, value, show_marc_param ):
-    #     """ Handler for cached z39.50 call and response.
-    #         Called by availability_service.availability_app.handler(). """
-    #     assert type(value) == unicode
-    #     cache = FileSystemCache( self.cache_dir, threshold=500, default_timeout=self.cache_minutes, mode=0664 )  # http://werkzeug.pocoo.org/docs/0.9/contrib/cache/
-    #     cache_key = u'%s_%s_%s' % ( key, value, show_marc_param )
-    #     response_dict = cache.get( cache_key )
-    #     if response_dict is None:
-    #         self.log.debug( u'in utils.app_helper.HandlerHelper.build_response_dict(); _not_ using cache.' )
-    #         response_dict = self.query_josiah( key, value, show_marc_param )
-    #         cache.set( cache_key, response_dict )
-    #     return response_dict
 
     ## end EzbV1Helper()
 
@@ -259,23 +236,5 @@ class Parser( object ):
             bib = None
         log.debug( 'bib, `%s`' % bib )
         return bib
-
-    # def make_bibid( self, pymrc_rcrd ):
-    #     """ Parses bib.
-    #         Called by EzbV1Helper.build_holdings_dct()
-    #         TODO: try record-get_field() method; should be quicker. """
-    #     marc_dict = pymrc_rcrd.as_dict()
-    #     bibid = 'bibid_not_available'
-    #     for field in marc_dict['fields']:
-    #         ( key, val ) = list( field.items() )[0]
-    #         if key == '907':
-    #             for subfield in field[key][u'subfields']:
-    #                 ( key2, val2 ) = list( subfield.items() )[0]
-    #                 if key2 == 'a':
-    #                     bibid = val2
-    #                     break
-    #     bibid = bibid.replace( '.', '' )
-    #     log.debug( 'bibid, `%s`' % bibid )
-    #     return bibid
 
     ## end Parser()
