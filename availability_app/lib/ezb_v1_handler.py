@@ -48,25 +48,6 @@ class EzbV1Helper( object ):
         data_dct['response']['time_taken'] = str( datetime.datetime.now() - rq_now )
         return data_dct
 
-    # def build_data_dct( self, key, value, show_marc_param, request ):
-    #     """ Manager for z39.50 query, and result-processor.
-    #         Called by views.ezb_v1(). """
-    #     rq_now = datetime.datetime.now()
-    #     data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init', 'time_taken': 'init'} }
-    #     # pickled_data = self.query_josiah( key, value, show_marc_param )
-    #     pickled_data = cache.get( 'pickled_data_cached' )
-    #     if pickled_data is None:
-    #         log.debug( 'pickled_data was not cached; will query sierra' )
-    #         pickled_data = self.query_josiah( key, value, show_marc_param )
-    #         cache.set( 'pickled_data_cached', pickled_data )  # time could be last argument; defaults to settings.py entry
-    #     assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
-    #     unpickled_data = pickle.loads( pickled_data )
-    #     log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
-    #     data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
-    #     data_dct['response']['basics'] = self.build_summary_dct( data_dct['response']['sierra'] )
-    #     data_dct['response']['time_taken'] = str( datetime.datetime.now() - rq_now )
-    #     return data_dct
-
     def grab_z3950_data( self, key, value, show_marc_param ):
         """ Returns data from cache if available; otherwise calls sierra.
             Called by build_data_dct() """
@@ -155,31 +136,56 @@ class EzbV1Helper( object ):
         log.debug( 'items, ```%s```' % items )
         return items
 
+    # def build_summary_dct( self, sierra_holdings ):
+    #     """ Builds simple summary data.
+    #         Called by build_data_dct() """
+    #     summary_dct = { 'ezb_available_bibs': [] }
+    #     summary_dct['ezb_available_bibs'] = self.determine_ezb_requestability( sierra_holdings )
+    #     log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
+    #     return summary_dct
+
     def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
             Called by build_data_dct() """
-        summary_dct = { 'ezb_available_bibs': [] }
-        # summary_dct['title'] = sierra_holdings[0]['title']
-        summary_dct['ezb_available_bibs'] = self.determine_ezb_requestability( sierra_holdings )
+        summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [] }
+        summary_dct = self.determine_ezb_requestability( sierra_holdings, summary_dct )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
 
-    def determine_ezb_requestability( self, sierra_holdings ):
+    def determine_ezb_requestability( self, sierra_holdings, summary_dct ):
         """ Returns boolean for easyBorrow requestability.
             Called by build_summary_dct() """
         self.prep_ezb_requestable_locations()
         self.prep_ezb_requestable_statuses()
-        available_bibs = []
         for item in sierra_holdings:
+            item_available_holdings = []
             for holding_info in item['holdings']:
                 if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
-                    # available_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
-                    available_bibs.append( {
-                        'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib']
-                        } )
-                    break
-        log.debug( 'available_bibs, ```%s```' % pprint.pformat(available_bibs) )
-        return available_bibs
+                    # summary_dct['ezb_available_holdings'].append( holding_info )
+                    item_available_holdings.append( holding_info )
+            if len( item_available_holdings ) > 0:
+                summary_dct['ezb_available_holdings'] = summary_dct['ezb_available_holdings'] + item_available_holdings
+                bib_dct = { 'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib'] }
+                summary_dct['ezb_available_bibs'].append( bib_dct )
+        log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
+        return summary_dct
+
+    # def determine_ezb_requestability( self, sierra_holdings ):
+    #     """ Returns boolean for easyBorrow requestability.
+    #         Called by build_summary_dct() """
+    #     self.prep_ezb_requestable_locations()
+    #     self.prep_ezb_requestable_statuses()
+    #     available_bibs = []
+    #     for item in sierra_holdings:
+    #         for holding_info in item['holdings']:
+    #             if holding_info['localLocation'] in self.ezb_requestable_locations and holding_info['publicNote'] in self.ezb_requestable_statuses:
+    #                 # available_bibs.append( 'https://search.library.brown.edu/catalog/%s' % item['bib'] )
+    #                 available_bibs.append( {
+    #                     'title': item['title'], 'url': 'https://search.library.brown.edu/catalog/%s' % item['bib']
+    #                     } )
+    #                 break
+    #     log.debug( 'available_bibs, ```%s```' % pprint.pformat(available_bibs) )
+    #     return available_bibs
 
     def prep_ezb_requestable_locations( self ):
         """ Populates ezb_requestable_locations.
