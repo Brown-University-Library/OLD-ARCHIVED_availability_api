@@ -50,13 +50,12 @@ def ezb_v2( request, id_type, id_value ):
 
 def locations_and_statuses( request ):
     """ Shows values being used. """
-    from availability_app.lib import locations_and_statuses
     rq_now = datetime.datetime.now()
     data_dct = {
         'query': ezb1_helper.build_query_dict( request, rq_now ),
         'response': {
-            'ezb_available_locations': locations_and_statuses.ezb_available_locations,
-            'ezb_available_statuses': locations_and_statuses.ezb_available_statuses,
+            'ezb_available_locations': json.loads( os.environ['AVL_API__EZB_AVAILABLE_LOCATIONS'] ),
+            'ezb_available_statuses': json.loads( os.environ['AVL_API__EZB_AVAILABLE_STATUSES'] ),
             'time_taken': str( datetime.datetime.now() - rq_now ) }
     }
     output = json.dumps( data_dct, sort_keys=True, indent=2 )

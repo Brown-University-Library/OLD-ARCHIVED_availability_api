@@ -181,8 +181,7 @@ class EzbV1Helper( object ):
         """ Populates ezb_available_locations.
             Called by build_summary_dct()
             TODO: load from editable admin-db. """
-        from availability_app.lib import locations_and_statuses
-        ezb_available_locations = locations_and_statuses.ezb_available_locations
+        ezb_available_locations = json.loads( os.environ['AVL_API__EZB_AVAILABLE_LOCATIONS'] )
         log.debug( 'ezb_available_locations, ```%s```' % ezb_available_locations )
         self.ezb_available_locations = ezb_available_locations
         return
@@ -191,9 +190,8 @@ class EzbV1Helper( object ):
         """ Populates ezb_available_statuses.
             Called by build_summary_dct()
             TODO: load from editable admin-db. """
-        from availability_app.lib import locations_and_statuses
-        ezb_available_statuses = locations_and_statuses.ezb_available_statuses
-        log.debug( 'zezb_available_statuses, ```%s```' % ezb_available_statuses )
+        ezb_available_statuses = json.loads( os.environ['AVL_API__EZB_AVAILABLE_STATUSES'] )
+        log.debug( 'ezb_available_statuses, ```%s```' % ezb_available_statuses )
         self.ezb_available_statuses = ezb_available_statuses
         return
 
