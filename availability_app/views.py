@@ -5,15 +5,17 @@ import datetime, json, logging, os, pprint
 from availability_app import settings_app
 from availability_app.lib import view_info_helper
 from availability_app.lib.ezb_v1_handler import EzbV1Helper
+from availability_app.lib.stats_v1_handler import StatsBuilder
 from django.conf import settings as project_settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 
 
 log = logging.getLogger(__name__)
 ezb1_helper = EzbV1Helper()
+stats_builder = StatsBuilder()
 
 
 def info( request ):
@@ -45,6 +47,10 @@ def ezb_v1( request, id_type, id_value ):
 
 def ezb_v1_stats( request ):
     """ Returns basic stats on v1-api usage. """
+    ## grab & validate params
+    rq_now = datetime.datetime.now()
+    if stats_builder.check_params( request.GET, request.scheme, request.META['HTTP_HOST'], rq_now ) == False:
+        return HttpResponseBadRequest( stats_builder.output, content_type=u'application/javascript; charset=utf-8' )
     return HttpResponse( 'ezb_v1_stats handling coming' )
 
 
