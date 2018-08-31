@@ -12,6 +12,27 @@ from django.core.urlresolvers import reverse
 log = logging.getLogger(__name__)
 
 
+class StatsBuilder( object ):
+    """ Queries data and build stats response. """
+
+    def __intit__( self ):
+        self.output = None
+
+    def run_query( self, get_params_dct ):
+        results = {}
+        log.debug( 'results, %s' % pprint.pformat(results) )
+        return results
+
+    def build_response( self, results, request.GET, request.scheme, request.META['HTTP_HOST'], rq_now )
+        rsp_dct = {
+            'time_taken'
+        }
+
+
+
+    ## end StatsBuilder()
+
+
 class StatsValidator( object ):
     """ Validates params of stats-api calls. """
 

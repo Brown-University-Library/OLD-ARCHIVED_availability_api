@@ -52,6 +52,11 @@ def ezb_v1_stats( request ):
     if stats_validator.check_params( request.GET, request.scheme, request.META['HTTP_HOST'], rq_now ) == False:
         return HttpResponseBadRequest( stats_validator.output, content_type=u'application/javascript; charset=utf-8' )
     return HttpResponse( 'ezb_v1_stats handling coming' )
+    ## run-query
+    results = stats_builder.run_query( request.GET )
+    ## build response
+    stats_builder.build_response( results, request.GET, request.scheme, request.META['HTTP_HOST'], rq_now )
+    return HttpResponse( stats_builder.output, content_type=u'application/javascript; charset=utf-8' )
 
 
 def ezb_v2( request, id_type, id_value ):
