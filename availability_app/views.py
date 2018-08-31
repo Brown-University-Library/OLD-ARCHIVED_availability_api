@@ -43,6 +43,11 @@ def ezb_v1( request, id_type, id_value ):
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
 
+def ezb_v1_stats( request ):
+    """ Returns basic stats on v1-api usage. """
+    return HttpResponse( 'ezb_v1_stats handling coming' )
+
+
 def ezb_v2( request, id_type, id_value ):
     """ Handles upcoming easyborrow-api call. """
     return HttpResponse( 'ezb_v2_url handling coming' )

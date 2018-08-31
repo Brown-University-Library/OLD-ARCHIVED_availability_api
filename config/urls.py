@@ -15,6 +15,7 @@ urlpatterns = [
     url( r'^info/$',  avl_views.info, name='info_url' ),
 
     url( r'^v1/(?P<id_type>.*)/(?P<id_value>.*)/$',  avl_views.ezb_v1, name='ezb_v1_url' ),
+    url( r'^v1_stats/$',  avl_views.ezb_v1_stats, name='ezb_v1_stats_url' ),
 
     url( r'^v2/(?P<id_type>.*)/(?P<id_value>.*)/$',  avl_views.ezb_v2, name='ezb_v2_url' ),
 
