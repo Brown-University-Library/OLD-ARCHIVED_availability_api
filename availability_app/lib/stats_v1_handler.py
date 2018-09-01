@@ -31,14 +31,29 @@ class StatsBuilder( object ):
         rsp_dct = {
             'request': {
                 'date_time': str(rq_now),
-                'query': '%s://%s%s%s' % ( scheme, host, reverse('ezb_v1_stats_url'), prep_querystring(get_params) ) },
+                'query': '%s://%s%s%s' % ( scheme, host, reverse('ezb_v1_stats_url'), prep_querystring(get_params) )
+            },
             'response': {
-                'message': 'stats response coming',
-                'time_taken': str(datetime.datetime.now() - rq_now) }
+                'message': 'this is fake data; real stats response being built',
+                'lookups_ezb': {
+                    'oclc_lookup_count': 42,
+                    'isbn_lookup_count': 24
+                },
+                'lookups_unofficial': 2,
+                'period': {
+                    'first_record_timestamp': 'the-timestamp',
+                    'last_record_timestamp': 'the-timestamp',
+                    'query_range': self.build_query_range( get_params )
+                },
+                'time_taken': str(datetime.datetime.now() - rq_now)
             }
+        }
         log.debug( 'rsp_dct, ```%s```' % pprint.pformat(rsp_dct) )
         self.output = json.dumps( rsp_dct, sort_keys=True, indent = 2 )
         return
+
+    def build_query_range( get_params ):
+        return 'coming'
 
     ## end StatsBuilder()
 
