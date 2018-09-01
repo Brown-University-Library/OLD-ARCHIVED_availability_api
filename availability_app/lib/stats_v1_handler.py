@@ -19,16 +19,26 @@ class StatsBuilder( object ):
         self.output = None
 
     def run_query( self, get_params_dct ):
+        """ Grabs data for period.
+            Called by ezb_v1_stats() """
         results = {}
         log.debug( 'results, %s' % pprint.pformat(results) )
         return results
 
-    def build_response( self, results, request.GET, request.scheme, request.META['HTTP_HOST'], rq_now )
+    def build_response( self, results, get_params, scheme, host, rq_now ):
+        """ Massages data into response.
+            Called by ezb_v1_stats() """
         rsp_dct = {
-            'time_taken'
-        }
-
-
+            'request': {
+                'date_time': str(rq_now),
+                'query': '%s://%s%s%s' % ( scheme, host, reverse('ezb_v1_stats_url'), prep_querystring(get_params) ) },
+            'response': {
+                'message': 'stats response coming',
+                'time_taken': str(datetime.datetime.now() - rq_now) }
+            }
+        log.debug( 'rsp_dct, ```%s```' % pprint.pformat(rsp_dct) )
+        self.output = json.dumps( rsp_dct, sort_keys=True, indent = 2 )
+        return
 
     ## end StatsBuilder()
 
@@ -58,8 +68,8 @@ class StatsValidator( object ):
             Called by check_params() """
         data = {
             'request': {
-                'date_time': str( datetime.datetime.now() ),
-                'query': '%s://%s%s%s' % ( scheme, host, reverse('ezb_v1_stats_url'), self.prep_querystring(get_params) ) },
+                'date_time': str(rq_now),
+                'query': '%s://%s%s%s' % ( scheme, host, reverse('ezb_v1_stats_url'), prep_querystring(get_params) ) },
             'response': {
                 'status': '400 / Bad Request',
                 'message': 'example url: %s://%s%s?start_date=2018-07-01&end_date=2018-07-31' % ( scheme, host, reverse('ezb_v1_stats_url') ),
@@ -68,13 +78,23 @@ class StatsValidator( object ):
         self.output = json.dumps( data, sort_keys=True, indent=2 )
         return
 
-    def prep_querystring( self, get_params ):
-        """ Makes querystring from params.
-            Called by handle_bad_params() """
-        if get_params:
-            querystring = '?%s' % get_params.urlencode()  # get_params is a django QueryDict object, which has a urlencode() method! yay!
-        else:
-            querystring = ''
-        return querystring
+    # def prep_querystring( self, get_params ):
+    #     """ Makes querystring from params.
+    #         Called by handle_bad_params() """
+    #     if get_params:
+    #         querystring = '?%s' % get_params.urlencode()  # get_params is a django QueryDict object, which has a urlencode() method! yay!
+    #     else:
+    #         querystring = ''
+    #     return querystring
 
     ## end StatsValidator()
+
+
+def prep_querystring( get_params ):
+    """ Makes querystring from params.
+        Called by handle_bad_params() """
+    if get_params:
+        querystring = '?%s' % get_params.urlencode()  # get_params is a django QueryDict object, which has a urlencode() method! yay!
+    else:
+        querystring = ''
+    return querystring
