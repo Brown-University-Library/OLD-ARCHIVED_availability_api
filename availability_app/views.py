@@ -13,7 +13,8 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedire
 from django.shortcuts import get_object_or_404, render
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger( __name__ )
+slog = logging.getLogger( 'stats_logger' )
 ezb1_helper = EzbV1Helper()
 stats_builder = StatsBuilder()
 stats_validator = StatsValidator()
@@ -48,6 +49,8 @@ def ezb_v1( request, id_type, id_value ):
 
 def ezb_v1_stats( request ):
     """ Returns basic stats on v1-api usage. """
+    log.debug( 'starting ezb_v1_stats()' )
+    slog.info( 'new entry!' )
     ## grab & validate params
     rq_now = datetime.datetime.now()
     if stats_validator.check_params( request.GET, request.scheme, request.META['HTTP_HOST'], rq_now ) == False:
