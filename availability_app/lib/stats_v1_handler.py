@@ -17,10 +17,14 @@ class StatsBuilder( object ):
 
     def __intit__( self ):
         self.output = None
+        self.period_start = None
+        self.period_end = None
 
     def run_query( self, get_params_dct ):
         """ Grabs data for period.
             Called by ezb_v1_stats() """
+        self.period_start = '%s 00:00:00' % get_params_dct['start_date']
+        self.period_end = '%s 23:59:59' % get_params_dct['end_date']
         results = {}
         log.debug( 'results, %s' % pprint.pformat(results) )
         return results
@@ -41,9 +45,9 @@ class StatsBuilder( object ):
                 },
                 'lookups_unofficial': 2,
                 'period': {
-                    'first_record_timestamp': 'the-timestamp',
-                    'last_record_timestamp': 'the-timestamp',
-                    'query_range': self.build_query_range( get_params )
+                    'first_record_timestamp': '2018-07-02 10:01:30',
+                    'last_record_timestamp': '2018-07-28 22:13:48',
+                    'query_range': 'from `%s` through `%s`' % ( self.period_start, self.period_end )
                 },
                 'time_taken': str(datetime.datetime.now() - rq_now)
             }
@@ -51,9 +55,6 @@ class StatsBuilder( object ):
         log.debug( 'rsp_dct, ```%s```' % pprint.pformat(rsp_dct) )
         self.output = json.dumps( rsp_dct, sort_keys=True, indent = 2 )
         return
-
-    def build_query_range( get_params ):
-        return 'coming'
 
     ## end StatsBuilder()
 
