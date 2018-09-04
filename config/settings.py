@@ -123,7 +123,7 @@ LOGGING = {
         'logfile': {
             'level':'DEBUG',
             'class':'logging.FileHandler',  # note: configure server to use system's log-rotate to avoid permissions issues
-            'filename': os.environ.get(u'AVL_API__LOG_PATH'),
+            'filename': os.environ.get('AVL_API__LOG_PATH'),
             'formatter': 'standard',
         },
         'console':{
@@ -131,14 +131,56 @@ LOGGING = {
             'class':'logging.StreamHandler',
             'formatter': 'standard'
         },
+        'stats_logfile': {
+            'level':'DEBUG',
+            'class':'logging.FileHandler',  # note: configure server to use system's log-rotate to avoid permissions issues
+            'filename': os.environ.get( 'AVL_API__STATS_LOG_PATH' ),
+            'formatter': 'standard',
+        },
     },
     'loggers': {
         'availability_app': {
             'handlers': ['logfile'],
-            'level': os.environ.get(u'AVL_API__LOG_LEVEL'),
+            'level': os.environ.get( 'AVL_API__LOG_LEVEL' ),
+            'propagate': False,
+        },
+        'stats_logger': {
+            'handlers': ['stats_logfile'],
+            'level': 'INFO',
+            'propagate': False,
         },
     }
 }
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'standard': {
+#             'format': "[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s",
+#             'datefmt' : "%d/%b/%Y %H:%M:%S"
+#         }
+#     },
+#     'handlers': {
+#         'logfile': {
+#             'level':'DEBUG',
+#             'class':'logging.FileHandler',  # note: configure server to use system's log-rotate to avoid permissions issues
+#             'filename': os.environ.get('AVL_API__LOG_PATH'),
+#             'formatter': 'standard',
+#         },
+#         'console':{
+#             'level':'DEBUG',
+#             'class':'logging.StreamHandler',
+#             'formatter': 'standard'
+#         },
+#     },
+#     'loggers': {
+#         'availability_app': {
+#             'handlers': ['logfile'],
+#             'level': os.environ.get('AVL_API__LOG_LEVEL'),
+#         },
+#     }
+# }
 
 ## https://docs.djangoproject.com/en/1.11/topics/cache/
 CACHES = json.loads( os.environ['AVL_API__CACHES_JSON'] )
