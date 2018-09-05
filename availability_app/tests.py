@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import json, logging, pprint
 from availability_app import settings_app
+from django.conf import settings as project_settings
 from django.test import TestCase
 from availability_app.lib.log_parser import LogParser
 
@@ -17,10 +18,11 @@ class LogParserTest( TestCase ):
 
     def setUp(self):
         parser = LogParser()
-        lines = self.load()
+        self.lines = self.load()
 
     def load(self):
-        text_path = './lib/test_text.txt'
+        text_path = '%s/availability_app/lib/test_text.txt' % project_settings.BASE_DIR
+        log.debug( 'text_path, `%s`' % text_path )
         entries = []
         with open( text_path ) as f:
             entries = f.readlines()
@@ -28,7 +30,7 @@ class LogParserTest( TestCase ):
 
     def test_find_segments(self):
         """ Checks raw line parsing into pieces. """
-        self.assertEqual( 2, len(lines) )
+        self.assertEqual( 10, len(self.lines) )
 
     ## end LogParserTest()
 
