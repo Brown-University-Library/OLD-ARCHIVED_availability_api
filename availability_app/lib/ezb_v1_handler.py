@@ -112,16 +112,16 @@ class EzbV1Helper( object ):
                 request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
                 request.META.get('REQUEST_URI', request.META['PATH_INFO'])
                 ),
-            'timestamp': str( rq_now )
-            }
-        self.build_stats_dct( query_dct['url'], request.META.get('HTTP_REFERER', None), request.META.get('HTTP_USER_AGENT', None) )
+            'timestamp': str( rq_now ) }
+        self.build_stats_dct(
+            query_dct['url'], request.META.get('HTTP_REFERER', None), request.META.get('HTTP_USER_AGENT', None), request.META.get('REMOTE_ADDR', None) )
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    def build_stats_dct( self, query_url, referrer, user_agent ):
+    def build_stats_dct( self, query_url, referrer, user_agent, ip ):
         """ Builds and logs data for stats.
             Called by build_query_dct() """
-        stats_dct = { 'query': query_url, 'referrer': None, 'user_agent': user_agent }
+        stats_dct = { 'query': query_url, 'referrer': None, 'user_agent': user_agent, 'ip': ip }
         if referrer:
             output = urllib.parse.urlparse( referrer )
             stats_dct['referrer'] = output
