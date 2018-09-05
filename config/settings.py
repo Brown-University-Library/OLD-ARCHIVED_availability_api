@@ -22,7 +22,6 @@ SECRET_KEY = os.environ['AVL_API__SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = json.loads( os.environ['AVL_API__DEBUG_JSON'] )  # will be True or False
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = json.loads( os.environ['AVL_API__ADMINS_JSON'] )
 MANAGERS = ADMINS
@@ -88,7 +87,23 @@ STATIC_ROOT = os.environ['AVL_API__STATIC_ROOT']  # needed for collectstatic com
 
 # Templates
 
-TEMPLATE_DIRS = json.loads( os.environ['AVL_API__TEMPLATE_DIRS'] )  # list
+templt_dirs = json.loads( os.environ['AVL_API__TEMPLATE_DIRS'] )  # list
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': templt_dirs,
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        # 'TEMPLATE_DEBUG': DEBUG
+        },
+    },
+]
 
 
 # Email
