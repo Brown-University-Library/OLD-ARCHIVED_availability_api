@@ -5,10 +5,32 @@ from __future__ import unicode_literals
 import json, logging, pprint
 from availability_app import settings_app
 from django.test import TestCase
+from availability_app.lib.log_parser import LogParser
 
 
 log = logging.getLogger(__name__)
 TestCase.maxDiff = None
+
+
+class LogParserTest( TestCase ):
+    """ Checks LogParser() """
+
+    def setUp(self):
+        parser = LogParser()
+        lines = self.load()
+
+    def load(self):
+        text_path = './lib/test_text.txt'
+        entries = []
+        with open( text_path ) as f:
+            entries = f.readlines()
+        return entries
+
+    def test_find_segments(self):
+        """ Checks raw line parsing into pieces. """
+        self.assertEqual( 2, len(lines) )
+
+    ## end LogParserTest()
 
 
 class UrlTest( TestCase ):
@@ -67,38 +89,4 @@ class V1_UrlTest( TestCase ):
     #     response_dct = json.loads( response.content )
     #     self.assertEqual( 'query_key bad', response_dct['response']['error'] )
 
-    ## end class V2_IsbnUrlTest
-
-
-# class V2_IsbnUrlTest( TestCase ):
-#     """ Checks isbn urls. """
-
-#     def test_found_isbn_1(self):
-#         """ Checks found isbn'. """
-#         response = self.client.get( '/v2/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_01) )  # project root part of url is assumed
-#         content = response.content.decode('utf-8')
-#         self.assertTrue( '"bibid": ".b18151139"' in content )
-#         self.assertTrue( '"bibid": ".b27679275"' in content )
-#         self.assertTrue( 'Zen and the art of motorcycle maintenance' in content )
-
-#     def test_no_duplicate_bibs(self):
-#         """ Checks handling when duplicate are returned by the z39.50 search. """
-#         response = self.client.get( '/v2/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_02) )  # project root part of url is assumed
-#         response_dct = json.loads( response.content )
-#         bib_list = []
-#         for entry in response_dct['response']['backend_response']:
-#             log.debug( 'current bibid, `{}`'.format(entry['bibid']) )
-#             self.assertEqual( False, entry['bibid'] in bib_list )
-#             bib_list.append( entry['bibid'] )
-#             log.debug( 'bib_list is now, ```{}```'.format(pprint.pformat(bib_list)) )
-
-#     def test_found_isbn_2(self):
-#         """ Checks found isbn that was problematic in old api'. """
-#         response = self.client.get( '/v2/isbn/{}/'.format( settings_app.TEST_ISBN_FOUND_02) )  # project root part of url is assumed
-#         content = response.content.decode('utf-8')
-#         self.assertTrue( '"bibid": ".b28149300"' in content )
-#         self.assertTrue( '"bibid": ".b26968939"' in content )
-#         self.assertTrue( 'Africa and Africans' in content )
-#         self.assertTrue( 'The Kongolese Saint Anthony' in content )
-
-#     # end class V2_IsbnUrlTest
+    ## end class V1_UrlTest()
