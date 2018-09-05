@@ -40,7 +40,7 @@ class EzbV1Helper( object ):
         """ Manager for z39.50 query, and result-processor.
             Called by views.ezb_v1(). """
         rq_now = datetime.datetime.now()
-        data_dct = { 'request': self.build_query_dict( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init', 'time_taken': 'init'} }
+        data_dct = { 'request': self.build_query_dct( request, rq_now ), 'response': {'basics': 'init', 'sierra': 'init', 'time_taken': 'init'} }
         pickled_data = self.grab_z3950_data( key, value, show_marc_param )
         assert type(pickled_data) == bytes, 'type(pickled_data), %s' % type(pickled_data)
         unpickled_data = pickle.loads( pickled_data )
@@ -77,7 +77,7 @@ class EzbV1Helper( object ):
         log.debug( 'output, ```%s```; error, ```%s```' % (output, error) )
         return output
 
-    # def build_query_dict( self, request, rq_now ):
+    # def build_query_dct( self, request, rq_now ):
     #     query_dct = {
     #         'url': '%s://%s%s' % ( request.scheme,
     #             request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
@@ -88,7 +88,25 @@ class EzbV1Helper( object ):
     #     log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
     #     return query_dct
 
-    def build_query_dict( self, request, rq_now ):
+    # def build_query_dct( self, request, rq_now ):
+    #     """ Builds query-dct part of response.
+    #         Called by: build_data_dct() """
+    #     query_dct = {
+    #         'url': '%s://%s%s' % ( request.scheme,
+    #             request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
+    #             request.META.get('REQUEST_URI', request.META['PATH_INFO'])
+    #             ),
+    #         'timestamp': str( rq_now )
+    #         }
+    #     log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
+    #     stats_dct = query_dct.copy()
+    #     stats_dct['source'] = self.log_source( request )
+    #     slog.info( json.dumps(stats_dct) )
+    #     return query_dct
+
+    def build_query_dct( self, request, rq_now ):
+        """ Builds query-dct part of response.
+            Called by: build_data_dct() """
         query_dct = {
             'url': '%s://%s%s' % ( request.scheme,
                 request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
@@ -96,23 +114,19 @@ class EzbV1Helper( object ):
                 ),
             'timestamp': str( rq_now )
             }
+        self.build_stats_dct( query_dct['url'], request.META.get('HTTP_REFERER', None), request.META.get('HTTP_USER_AGENT', None) )
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
-        stats_dct = query_dct.copy()
-        stats_dct['source'] = self.log_source( request )
-        slog.info( json.dumps(stats_dct) )
         return query_dct
 
-    def log_source( self, request ):
-        """ Returns source info.
-            Called by build_query_dict() """
-        src_dct = { 'host': None, 'user_agent': None }
-        referrer = request.META.get( 'HTTP_REFERER', None )
+    def build_stats_dct( self, query_url, referrer, user_agent ):
+        """ Builds and logs data for stats.
+            Called by build_query_dct() """
+        stats_dct = { 'query': query_url, 'referrer': None, 'user_agent': user_agent }
         if referrer:
             output = urllib.parse.urlparse( referrer )
-            src_dct['host'] = output.netloc
-        src_dct['user_agent'] = request.META.get( 'HTTP_USER_AGENT', None )
-        log.debug( 'src_dct, ```%s```' % pprint.pformat(src_dct) )
-        return src_dct
+            stats_dct['referrer'] = output
+        slog.info( json.dumps(stats_dct) )
+        return
 
     def build_holdings_dct( self, unpickled_dct ):
         """ Processes z3950 data into response.
