@@ -4,12 +4,14 @@
 Helper for views.handler()
 """
 
-import datetime, json, logging, os, pickle, pprint, subprocess
+import datetime, json, logging, os, pickle, pprint, subprocess, urllib
 import pymarc
 from availability_app import settings_app
 from django.core.cache import cache
 
+
 log = logging.getLogger(__name__)
+slog = logging.getLogger( 'stats_logger' )
 
 
 class EzbV1Helper( object ):
@@ -75,6 +77,17 @@ class EzbV1Helper( object ):
         log.debug( 'output, ```%s```; error, ```%s```' % (output, error) )
         return output
 
+    # def build_query_dict( self, request, rq_now ):
+    #     query_dct = {
+    #         'url': '%s://%s%s' % ( request.scheme,
+    #             request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
+    #             request.META.get('REQUEST_URI', request.META['PATH_INFO'])
+    #             ),
+    #         'timestamp': str( rq_now )
+    #         }
+    #     log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
+    #     return query_dct
+
     def build_query_dict( self, request, rq_now ):
         query_dct = {
             'url': '%s://%s%s' % ( request.scheme,
@@ -84,7 +97,22 @@ class EzbV1Helper( object ):
             'timestamp': str( rq_now )
             }
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
+        stats_dct = query_dct.copy()
+        stats_dct['source'] = self.log_source( request )
+        slog.info( json.dumps(stats_dct) )
         return query_dct
+
+    def log_source( self, request ):
+        """ Returns source info.
+            Called by build_query_dict() """
+        src_dct = { 'host': None, 'user_agent': None }
+        referrer = request.META.get( 'HTTP_REFERER', None )
+        if referrer:
+            output = urllib.parse.urlparse( referrer )
+            src_dct['host'] = output.netloc
+        src_dct['user_agent'] = request.META.get( 'HTTP_USER_AGENT', None )
+        log.debug( 'src_dct, ```%s```' % pprint.pformat(src_dct) )
+        return src_dct
 
     def build_holdings_dct( self, unpickled_dct ):
         """ Processes z3950 data into response.

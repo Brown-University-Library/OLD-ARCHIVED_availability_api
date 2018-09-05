@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class StatsBuilder( object ):
     """ Queries data and build stats response. """
 
-    def __intit__( self ):
+    def __init__( self ):
         self.output = None
         self.period_start = None
         self.period_end = None
