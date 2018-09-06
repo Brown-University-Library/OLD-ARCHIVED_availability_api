@@ -39,6 +39,7 @@ class LogAnalyzer( object ):
             rcrd = Tracker.objects.get( count_date=dtm_obj.date() )
         except:
             rcrd = Tracker()
+        ## if 'ip' is 'x' and 'oclc' in 'query_url': rcrd.oclc += 1 --> rcrd.save()
         pass
 
     ## end LogAnalyzer()
