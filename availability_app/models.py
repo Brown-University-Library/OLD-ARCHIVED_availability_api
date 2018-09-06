@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.http import HttpResponseRedirect
 
+
 log = logging.getLogger(__name__)
 
 

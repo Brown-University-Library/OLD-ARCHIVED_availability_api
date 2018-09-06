@@ -6,6 +6,7 @@ For log analysis.
 
 import datetime, json, logging, os, pprint
 from log_parser import LogParser
+from availability_app.models import Tracker
 
 
 log = logging.getLogger(__name__)
@@ -25,14 +26,19 @@ class LogAnalyzer( object ):
         worthy_entries = self.check_files( last_check_date )
         for entry in worthy_entries:
             log_parts_dct = parser.make_parts( entry )
-            entry_date = parser.get_date( log_parts_dct['date_string'] )
+            entry_datetime = parser.get_date( log_parts_dct['date_string'] )
             data_dct = json.loads( log_parts_dct['json_string'] )
-            self.process_entry( entry_date, data_dct )
+            self.process_entry( entry_datetime, data_dct )
         return
 
-    def process_entry( self, entry_date, data_dct ):
+    def process_entry( self, entry_datetime, data_dct ):
         """ Updates db with data.
             Called by check_logs() """
+        log_date = entry_datetime.date()
+        try:
+            rcrd = Tracker.objects.get( count_date=dtm_obj.date() )
+        except:
+            rcrd = Tracker()
         pass
 
     ## end LogAnalyzer()
