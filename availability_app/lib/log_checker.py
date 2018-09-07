@@ -4,7 +4,17 @@
 For log analysis.
 """
 
-import datetime, json, logging, os, pprint
+import datetime, json, logging, os, pprint, sys
+
+## configure django environment
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+cwd = os.getcwd()  # this assumes the cron call has cd-ed into the project directory
+if cwd not in sys.path:
+    sys.path.append( cwd )
+django.setup()
+
+## continue normal imports
 from log_parser import LogParser
 from availability_app.models import Tracker
 
@@ -30,6 +40,9 @@ class LogAnalyzer( object ):
             data_dct = json.loads( log_parts_dct['json_string'] )
             self.process_entry( entry_datetime, data_dct )
         return
+
+    def get_last_check_date( self ):
+        pass
 
     def process_entry( self, entry_datetime, data_dct ):
         """ Updates db with data.
