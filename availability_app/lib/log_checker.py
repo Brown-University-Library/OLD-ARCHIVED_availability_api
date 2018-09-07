@@ -19,7 +19,14 @@ from log_parser import LogParser
 from availability_app.models import Tracker
 
 
+logging.basicConfig(
+    filename=os.environ['AVL_API__LOG_PATH'],
+    level=logging.DEBUG,
+    format='[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s',
+    datefmt='%d/%b/%Y %H:%M:%S',
+    )
 log = logging.getLogger(__name__)
+
 parser = LogParser()
 
 
@@ -42,7 +49,14 @@ class LogAnalyzer( object ):
         return
 
     def get_last_check_date( self ):
-        pass
+        """ Returns date of last check.
+            Called by check_logs() """
+        with open( self.last_checked_path ) as fh:
+            dt_str_1 = json.loads( fh.read() )
+            dt_str_2 = dt_str_1[0:26]  # in case 'Z' or '+' time-zone stuff is appended
+            dt= datetime.datetime.strptime( dt_str_2, '%Y-%m-%dT%H:%M:%S.%f' )
+            log.debug( 'dt, `%s`' % dt )
+            return dt
 
     def process_entry( self, entry_datetime, data_dct ):
         """ Updates db with data.
@@ -59,5 +73,6 @@ class LogAnalyzer( object ):
 
 
 if __name__ == '__main__':
+    log.debug( '\n---\nstarting' )
     analyzer = LogAnalyzer()
     analyzer.check_logs()
