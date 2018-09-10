@@ -121,7 +121,7 @@ class EzbV1Helper( object ):
     def build_stats_dct( self, query_url, referrer, user_agent, ip ):
         """ Builds and logs data for stats.
             Called by build_query_dct() """
-        stats_dct = { 'query': query_url, 'referrer': None, 'user_agent': user_agent, 'ip': ip }
+        stats_dct = { 'datetime': datetime.datetime.now().isoformat(), 'query': query_url, 'referrer': None, 'user_agent': user_agent, 'ip': ip }
         if referrer:
             output = urllib.parse.urlparse( referrer )
             stats_dct['referrer'] = output
