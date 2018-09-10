@@ -134,8 +134,12 @@ LOGGING = {
             'datefmt' : "%d/%b/%Y %H:%M:%S"
         },
         'microseconds': {
-            'format': "[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S.%f"
+            # 'format': "[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s",
+            # 'format': "[%(asctime)s.%(msecs)03d[%(levelname)-8s]:%(created).6f %(message)s",
+            # 'format': "[%(asctime)s.%(msecs)03d] -- %(levelname)s -- %(created).6f",
+            # 'format': "[%(asctime)s--%(created).6f--] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s",
+            'format': "%(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
         }
     },
     'handlers': {
