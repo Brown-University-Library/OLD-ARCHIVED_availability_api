@@ -132,6 +132,10 @@ LOGGING = {
         'standard': {
             'format': "[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s",
             'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+        'microseconds': {
+            'format': "[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S.%f"
         }
     },
     'handlers': {
@@ -150,7 +154,7 @@ LOGGING = {
             'level':'DEBUG',
             'class':'logging.FileHandler',  # note: configure server to use system's log-rotate to avoid permissions issues
             'filename': os.environ.get( 'AVL_API__STATS_LOG_PATH' ),
-            'formatter': 'standard',
+            'formatter': 'microseconds',
         },
     },
     'loggers': {
