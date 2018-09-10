@@ -13,9 +13,9 @@ log = logging.getLogger(__name__)
 
 class Tracker( models.Model ):
     count_date = models.DateField( blank=True, null=True )
-    ezb_isbn_count = models.IntegerField( null=True, blank=True )
-    ezb_oclc_count = models.IntegerField( null=True, blank=True )
-    ezb_bib_count = models.IntegerField( null=True, blank=True )
-    unofficial_access_count = models.IntegerField( null=True, blank=True )
+    ezb_isbn_count = models.IntegerField( null=True, blank=True, default=0 )
+    ezb_oclc_count = models.IntegerField( null=True, blank=True, default=0 )
+    ezb_bib_count = models.IntegerField( null=True, blank=True, default=0 )
+    unofficial_access_count = models.IntegerField( null=True, blank=True, default=0 )
     dt_created = models.DateTimeField( auto_now_add=True )
     dt_modified = models.DateTimeField( auto_now=True )
