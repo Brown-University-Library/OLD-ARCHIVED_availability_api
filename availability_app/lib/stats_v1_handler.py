@@ -40,15 +40,22 @@ class StatsBuilder( object ):
     def build_response( self, results, get_params, scheme, host, rq_now ):
         """ Massages data into response.
             Called by ezb_v1_stats() """
-        first_record_date = results.first().count_date
-        last_record_date = results.last().count_date
-        unofficial = 0
-        ezb_isbn = 0
-        ezb_oclc = 0
-        for trckr_entry in results:
-            unofficial += trckr_entry.unofficial_access_count
-            ezb_isbn += trckr_entry.ezb_isbn_count
-            ezb_oclc += trckr_entry.ezb_oclc_count
+        if results:
+            first_record_date = results.first().count_date
+            last_record_date = results.last().count_date
+            unofficial = 0
+            ezb_isbn = 0
+            ezb_oclc = 0
+            for trckr_entry in results:
+                unofficial += trckr_entry.unofficial_access_count
+                ezb_isbn += trckr_entry.ezb_isbn_count
+                ezb_oclc += trckr_entry.ezb_oclc_count
+        else:
+            first_record_date = None
+            last_record_date = None
+            unofficial = 0
+            ezb_isbn = 0
+            ezb_oclc = 0
         rsp_dct = {
             'request': {
                 'date_time': str(rq_now),
