@@ -23,7 +23,6 @@ class StatsBuilder( object ):
         self.period_start_obj = None
         self.period_end_obj = None
 
-
     def run_query( self, get_params_dct ):
         """ Grabs data for period.
             Called by views.ezb_v1_stats() """
@@ -41,6 +40,15 @@ class StatsBuilder( object ):
     def build_response( self, results, get_params, scheme, host, rq_now ):
         """ Massages data into response.
             Called by ezb_v1_stats() """
+        first_record_date = results.first().count_date
+        last_record_date = results.last().count_date
+        unofficial = 0
+        ezb_isbn = 0
+        ezb_oclc = 0
+        for trckr_entry in results:
+            unofficial += trckr_entry.unofficial_access_count
+            ezb_isbn += trckr_entry.ezb_isbn_count
+            ezb_oclc += trckr_entry.ezb_oclc_count
         rsp_dct = {
             'request': {
                 'date_time': str(rq_now),
@@ -49,13 +57,13 @@ class StatsBuilder( object ):
             'response': {
                 'message': 'this is fake data; real stats response being built',
                 'lookups_ezb': {
-                    'oclc_lookup_count': 42,
-                    'isbn_lookup_count': 24
+                    'oclc_lookup_count': ezb_oclc,
+                    'isbn_lookup_count': ezb_isbn
                 },
-                'lookups_unofficial': 2,
+                'lookups_unofficial': unofficial,
                 'period': {
-                    'first_record_timestamp': '2018-07-02 10:01:30',
-                    'last_record_timestamp': '2018-07-28 22:13:48',
+                    'first_results_date': str(first_record_date),
+                    'last_results_date': str(last_record_date),
                     'query_range': 'from `%s` through `%s`' % ( self.period_start, self.period_end )
                 },
                 'time_taken': str(datetime.datetime.now() - rq_now)
