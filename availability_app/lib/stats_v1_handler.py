@@ -62,7 +62,6 @@ class StatsBuilder( object ):
                 'query': '%s://%s%s%s' % ( scheme, host, reverse('ezb_v1_stats_url'), prep_querystring(get_params) )
             },
             'response': {
-                'message': 'this is fake data; real stats response being built',
                 'lookups_ezb': {
                     'oclc_lookup_count': ezb_oclc,
                     'isbn_lookup_count': ezb_isbn
