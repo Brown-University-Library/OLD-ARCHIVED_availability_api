@@ -26,23 +26,24 @@ class LogParserTest( TestCase ):
             entries = f.readlines()
         return entries
 
-    def test_make_parts(self):
-        """ Checks raw line parsing into pieces. """
-        self.assertEqual( 10, len(self.lines) )
-        self.assertEqual( '[02/Aug/2018 15:21:56]', self.parser.make_parts(self.lines[0])['date_string'] )
-        j_string = self.parser.make_parts(self.lines[0])['json_string']
-        self.assertEqual( '{"query": "https://library.brown.edu/availability_api/v1/oclc/870647187/"', j_string[0:73] )
+    # def test_make_parts(self):
+    #     """ Checks raw line parsing into pieces. """
+    #     self.assertEqual( 10, len(self.lines) )
+    #     self.assertEqual( '[02/Aug/2018 15:21:56]', self.parser.make_parts(self.lines[0])['date_string'] )
+    #     j_string = self.parser.make_parts(self.lines[0])['json_string']
+    #     self.assertEqual( '{"query": "https://library.brown.edu/availability_api/v1/oclc/870647187/"', j_string[0:73] )
 
     def test_make_date(self):
         """ Checks string-to-date conversion. """
-        dt = datetime.datetime(2018, 8, 2, 15, 21, 56)
-        self.assertEqual( dt, self.parser.get_date('[02/Aug/2018 15:21:56]') )
+        dt = datetime.datetime( 2018, 9, 10, 15, 44, 47, 9965 )
+        # self.assertEqual( dt, self.parser.get_date('[02/Aug/2018 15:21:56]') )
+        self.assertEqual( dt, self.parser.get_date('2018-09-10T15:44:47.009965') )
 
-    def test_make_jdct(self):
-        """ Checks for valid json. """
-        jstring = self.parser.make_parts( self.lines[0] )['json_string']
-        jdct = json.loads( jstring )
-        self.assertEqual( ['ip', 'query', 'referrer', 'user_agent'], sorted(list(jdct.keys())) )
+    # def test_make_jdct(self):
+    #     """ Checks for valid json. """
+    #     jstring = self.parser.make_parts( self.lines[0] )['json_string']
+    #     jdct = json.loads( jstring )
+    #     self.assertEqual( ['ip', 'query', 'referrer', 'user_agent'], sorted(list(jdct.keys())) )
 
     ## end LogParserTest()
 

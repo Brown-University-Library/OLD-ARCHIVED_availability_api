@@ -28,11 +28,11 @@ class LogParser( object ):
     #     log.debug( 'parts_dct, ```%s```' % pprint.pformat(parts_dct) )
     #     return parts_dct
 
-    def get_date( self, date_string ):
-        """ Returns date-object.
-            Called by: TBD """
-        dt = datetime.datetime.strptime( date_string, '[%d/%b/%Y %H:%M:%S]' )
-        return dt
+    # def get_date( self, date_string ):
+    #     """ Returns date-object.
+    #         Called by: TBD """
+    #     dt = datetime.datetime.strptime( date_string, '[%d/%b/%Y %H:%M:%S]' )
+    #     return dt
 
     def get_date( self, date_string ):
         """ Returns date-object.
