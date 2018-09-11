@@ -6,6 +6,7 @@ Helper for views.ezb_v1_stats()
 
 import datetime, json, logging, os, pickle, pprint, subprocess
 from availability_app import settings_app
+from availability_app.models import Tracker
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 
@@ -19,13 +20,21 @@ class StatsBuilder( object ):
         self.output = None
         self.period_start = None
         self.period_end = None
+        self.period_start_obj = None
+        self.period_end_obj = None
+
 
     def run_query( self, get_params_dct ):
         """ Grabs data for period.
-            Called by ezb_v1_stats() """
+            Called by views.ezb_v1_stats() """
         self.period_start = '%s 00:00:00' % get_params_dct['start_date']
         self.period_end = '%s 23:59:59' % get_params_dct['end_date']
-        results = {}
+        self.period_start_obj = datetime.datetime.strptime( self.period_start, '%Y-%m-%d %H:%M:%S' )
+        self.period_end_obj = datetime.datetime.strptime( self.period_end, '%Y-%m-%d %H:%M:%S' )
+        # results = {}
+        results = Tracker.objects.filter( count_date__gte=self.period_start_obj.date(), count_date__lte=self.period_end_obj.date() ).order_by( 'count_date' )
+        # log.debug( 'self.period_start_obj, `%s`' % self.period_start_obj )
+        # log.debug( 'self.period_end_obj, `%s`' % self.period_end_obj )
         log.debug( 'results, %s' % pprint.pformat(results) )
         return results
 
