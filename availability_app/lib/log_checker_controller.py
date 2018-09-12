@@ -29,6 +29,8 @@ log = logging.getLogger(__name__)
 
 parser = LogParser()
 
+os.nice( 19 )
+
 
 class LogAnalyzer( object ):
     """ Analyzes logs and populates db. """
