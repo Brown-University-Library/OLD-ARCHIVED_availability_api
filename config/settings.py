@@ -107,6 +107,7 @@ TEMPLATES = [
 
 
 # Email
+SERVER_EMAIL = os.environ['AVL_API__SERVER_EMAIL']
 EMAIL_HOST = os.environ['AVL_API__EMAIL_HOST']
 EMAIL_PORT = int( os.environ['AVL_API__EMAIL_PORT'] )
 
@@ -143,6 +144,11 @@ LOGGING = {
         }
     },
     'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
         'logfile': {
             'level':'DEBUG',
             'class':'logging.FileHandler',  # note: configure server to use system's log-rotate to avoid permissions issues
@@ -162,6 +168,11 @@ LOGGING = {
         },
     },
     'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+            },
         'availability_app': {
             'handlers': ['logfile'],
             'level': os.environ.get( 'AVL_API__LOG_LEVEL' ),
