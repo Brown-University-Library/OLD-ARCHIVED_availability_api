@@ -7,11 +7,13 @@ Helper for views.handler()
 import datetime, json, logging, os, pickle, pprint, subprocess, urllib
 import pymarc
 from availability_app import settings_app
+from availability_app.lib.log_parser import LogParser
 from django.core.cache import cache
 
 
 log = logging.getLogger(__name__)
 slog = logging.getLogger( 'stats_logger' )
+parser = LogParser()
 
 
 class EzbV1Helper( object ):
@@ -25,12 +27,27 @@ class EzbV1Helper( object ):
         self.ezb_available_locations = None
         self.ezb_available_statuses = None
 
+    # def validate( self, key, value ):
+    #     """ Stub for validation. IP checking another possibility.
+    #         Called by views.ezb_v1(). """
+    #     message = u'init'
+    #     if key not in self.legit_services:
+    #         message = 'query_key bad'
+    #     if message == 'init':
+    #         message = 'good'
+    #     log.debug( 'message, {}'.format(message) )
+    #     return message
+
     def validate( self, key, value ):
         """ Stub for validation. IP checking another possibility.
-            Called by availability_service.availability_app.handler(). """
-        message = u'init'
+            Calling function expects 'good' message, or displays message as error.
+            Called by views.ezb_v1(). """
+        message = 'init'
         if key not in self.legit_services:
             message = 'query_key bad'
+        elif key == 'isbn':
+                if parser.validate_isbn(value) is False:
+                    message = 'bad isbn'
         if message == 'init':
             message = 'good'
         log.debug( 'message, {}'.format(message) )
