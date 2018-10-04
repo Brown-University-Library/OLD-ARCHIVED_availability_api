@@ -74,6 +74,7 @@ class EzbV1Helper( object ):
         log.debug( 'unpickled_data, ```%s```' % pprint.pformat(unpickled_data) )
         data_dct['response']['sierra'] = self.build_holdings_dct( unpickled_data )
         data_dct['response']['basics'] = self.build_summary_dct( data_dct['response']['sierra'] )
+        data_dct['response']['searched'] = { 'key': key, 'value': value }  # because the isbn value may have been changed ( see EzbV1HelperTest.test_good_short_isbn() )
         data_dct['response']['time_taken'] = str( datetime.datetime.now() - rq_now )
         return data_dct
 
