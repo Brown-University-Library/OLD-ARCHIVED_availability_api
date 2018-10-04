@@ -2,40 +2,75 @@
 
 import datetime, json, logging, pprint
 from availability_app import settings_app
+from availability_app.lib.ezb_v1_handler import EzbV1Helper, Validator
+from availability_app.lib.log_parser import LogParser
 from django.conf import settings as project_settings
 from django.test import TestCase
-from availability_app.lib.ezb_v1_handler import Parser
 
 
 log = logging.getLogger(__name__)
 TestCase.maxDiff = None
 
 
-class ValidityTest( TestCase ):
-    """ Checks submitted identifier. """
+class EzbV1HelperTest( TestCase ):
+    """ Checks helper functions. """
 
     def setUp(self):
-        self.parser = Parser()
+        self.helper = EzbV1Helper()
+
+    def test_oclc(self):
+        self.assertEqual(
+            {'validity': True, 'key': 'oclc', 'value': '21559548', 'error': None},
+            self.helper.validate('oclc', '21559548') )
+
+    def test_good_short_isbn(self):
+        self.assertEqual(
+            {'validity': True, 'key': 'isbn', 'value': '9780688002305', 'error': None},
+            self.helper.validate('isbn', '0688002307') )
+
+    def test_good_long_isbn(self):
+        self.assertEqual(
+            {'validity': True, 'key': 'isbn', 'value': '9780688002305', 'error': None},
+            self.helper.validate('isbn', '9780688002305') )
+
+    def test_bad_isbn(self):
+        self.assertEqual(
+            {'validity': False, 'key': 'isbn', 'value': '123', 'error': 'bad isbn'},
+            self.helper.validate('isbn', '123') )
+
+    def test_bad_key(self):
+        self.assertEqual(
+            {'validity': False, 'key': 'foo', 'value': 'bar', 'error': 'bad query-key'},
+            self.helper.validate('foo', 'bar') )
+
+    ## end EzbV1HelperTest()
+
+
+class ISBNvalidatorTest( TestCase ):
+    """ Checks submitted isbn. """
+
+    def setUp(self):
+        self.validator = Validator()
 
     def test_good_short_isbn(self):
         isbn = '0688002307'
-        self.assertEqual( True, self.parser.validate_isbn(isbn) )
-        self.assertEqual( 2, self.parser.EAN13 )
+        self.assertEqual( True, self.validator.validate_isbn(isbn) )
+        self.assertEqual( '9780688002305', self.validator.EAN13 )
 
     def test_good_long_isbn(self):
         isbn = '9780688002305'
-        self.assertEqual( True, self.parser.validate_isbn(isbn) )
-        self.assertEqual( 2, self.parser.EAN13 )
+        self.assertEqual( True, self.validator.validate_isbn(isbn) )
+        self.assertEqual( '9780688002305', self.validator.EAN13 )
 
     def test_bad_isbn(self):
         isbn = '123'
-        self.assertEqual( False, self.parser.validate_isbn(isbn) )
-        self.assertEqual( 2, self.parser.EAN13 )
+        self.assertEqual( False, self.validator.validate_isbn(isbn) )
+        self.assertEqual( None, self.validator.EAN13 )
 
     def test_problematic_isbn(self):
         isbn = '0415232015(cased)'
-        self.assertEqual( True, self.parser.validate_isbn(isbn) )
-        self.assertEqual( '9780415232012z', self.parser.EAN13 )
+        self.assertEqual( True, self.validator.validate_isbn(isbn) )
+        self.assertEqual( '9780415232012', self.validator.EAN13 )
 
     ## end ValidityTest()
 
