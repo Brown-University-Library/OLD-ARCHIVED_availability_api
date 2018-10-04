@@ -28,30 +28,40 @@ class EzbV1Helper( object ):
 
     # def validate( self, key, value ):
     #     """ Stub for validation. IP checking another possibility.
+    #         Calling function expects 'good' message, or displays message as error.
     #         Called by views.ezb_v1(). """
-    #     message = u'init'
+    #     validator = Validator()
+    #     message = 'init'
     #     if key not in self.legit_services:
     #         message = 'query_key bad'
+    #     elif key == 'isbn':
+    #             if validator.validate_isbn(value) is False:
+    #                 message = 'bad isbn'
     #     if message == 'init':
     #         message = 'good'
     #     log.debug( 'message, {}'.format(message) )
     #     return message
 
     def validate( self, key, value ):
-        """ Stub for validation. IP checking another possibility.
-            Calling function expects 'good' message, or displays message as error.
+        """ Initial validator. IP checking another possibility.
+            Returns dct because isbn value may be changed.
             Called by views.ezb_v1(). """
-        parser = Parser()
-        message = 'init'
+        validator = Validator()
+        rslt_dct = { 'validity': False, 'key': key, 'value': value, 'error': None }
         if key not in self.legit_services:
-            message = 'query_key bad'
+            rslt_dct['error'] = 'bad query-key'
+            rslt_dct['validity'] = False
         elif key == 'isbn':
-                if parser.validate_isbn(value) is False:
-                    message = 'bad isbn'
-        if message == 'init':
-            message = 'good'
-        log.debug( 'message, {}'.format(message) )
-        return message
+                if validator.validate_isbn(value) is False:
+                    rslt_dct['error'] = 'bad isbn'
+                    rslt_dct['validity'] = False
+                else:
+                    rslt_dct['value'] = validator.EAN13
+                    rslt_dct['validity'] = True
+        else:
+            rslt_dct['validity'] = True
+        log.debug( 'rslt_dct, ```%s```' % pprint.pformat(rslt_dct) )
+        return rslt_dct
 
     def build_data_dct( self, key, value, show_marc_param, request ):
         """ Manager for z39.50 query, and result-processor.
@@ -275,10 +285,21 @@ class Parser( object ):
         log.debug( 'bib, `%s`' % bib )
         return bib
 
+    ## end Parser()
+
+
+class Validator( object ):
+    """ Validates isbn and eventually oclc number.
+        Useful to prevent unnecessary z3950 queries. """
+
+    def __init__( self ):
+        self.EAN13 = None
+
     def validate_isbn( self, isbn ):
         """ Returns boolean.
             Called by TBD """
-        if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
+        self.EAN13 = isbnlib.EAN13( isbn )
+        if self.EAN13:
             rslt = True
         else:
             rslt = False
@@ -295,4 +316,5 @@ class Parser( object ):
     #         log.debug( 'isbn, `%s` is not valid' )
     #     return rslt
 
-    ## end Parser()
+    ## end Validator()
+
