@@ -168,6 +168,11 @@ class EzbV1Helper( object ):
             #
             # log.debug( 'bib?, ```%s```' % pymrc_obj.get_fields('907')[0].format_field() )
             #
+            locations_val = []
+            locations = pymrc_obj.location()
+            for loc in locations:
+                locations_val.append( loc.format_field() )
+            #
             notes_val = []
             notes = pymrc_obj.notes()
             for note in notes:
@@ -192,7 +197,7 @@ class EzbV1Helper( object ):
                 'bib': self.parser.grab_bib( pymrc_obj ),
                 'author': pymrc_obj.author(),
                 'isbn': pymrc_obj.isbn(),
-                'location': pymrc_obj.location(),
+                'locations': locations_val,
                 'notes': notes_val,
                 'physicaldescription': phys_desc_val,
                 'publisher': pymrc_obj.publisher(),
@@ -205,6 +210,56 @@ class EzbV1Helper( object ):
             items.append( item_dct )
         log.debug( 'items, ```%s```' % items )
         return items
+
+    # def build_holdings_dct( self, unpickled_dct ):
+    #     """ Processes z3950 data into response.
+    #         Called by build_data_dct() """
+    #     items = []
+    #     z_items = unpickled_dct['backend_response']
+    #     for z_item in z_items:
+    #         pymrc_obj = z_item['pymarc_obj']
+    #         log.debug( 'pymrc_obj.as_dict(), ```%s```' % pprint.pformat(pymrc_obj.as_dict()) )
+    #         holdings = z_item['holdings_data']
+    #         #
+    #         # log.debug( 'bib?, ```%s```' % pymrc_obj.get_fields('907')[0].format_field() )
+    #         #
+    #         notes_val = []
+    #         notes = pymrc_obj.notes()
+    #         for note in notes:
+    #             notes_val.append( note.format_field() )
+    #         #
+    #         phys_desc_val = []
+    #         physicaldescriptions = pymrc_obj.physicaldescription()
+    #         for phys_desc in physicaldescriptions:
+    #             phys_desc_val.append( phys_desc.format_field() )
+    #         #
+    #         series_val = []
+    #         series_entries = pymrc_obj.series()
+    #         for series in series_entries:
+    #             series_val.append( series.format_field() )
+    #         #
+    #         subjects_val = []
+    #         subjects = pymrc_obj.subjects()
+    #         for subject in subjects:
+    #             subjects_val.append( subject.format_field() )
+    #         #
+    #         item_dct = {
+    #             'bib': self.parser.grab_bib( pymrc_obj ),
+    #             'author': pymrc_obj.author(),
+    #             'isbn': pymrc_obj.isbn(),
+    #             'location': pymrc_obj.location(),
+    #             'notes': notes_val,
+    #             'physicaldescription': phys_desc_val,
+    #             'publisher': pymrc_obj.publisher(),
+    #             'pubyear': pymrc_obj.pubyear(),
+    #             'series': series_val,
+    #             'subjects': subjects_val,
+    #             'title': pymrc_obj.title(),
+    #             'uniformtitle': pymrc_obj.uniformtitle(),
+    #             'holdings': holdings }
+    #         items.append( item_dct )
+    #     log.debug( 'items, ```%s```' % items )
+    #     return items
 
     def build_summary_dct( self, sierra_holdings ):
         """ Builds simple summary data.
