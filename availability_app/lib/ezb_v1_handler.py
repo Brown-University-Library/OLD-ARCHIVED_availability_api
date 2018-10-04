@@ -5,15 +5,14 @@ Helper for views.handler()
 """
 
 import datetime, json, logging, os, pickle, pprint, subprocess, urllib
+import isbnlib
 import pymarc
 from availability_app import settings_app
-from availability_app.lib.log_parser import LogParser
 from django.core.cache import cache
 
 
 log = logging.getLogger(__name__)
 slog = logging.getLogger( 'stats_logger' )
-parser = LogParser()
 
 
 class EzbV1Helper( object ):
@@ -42,6 +41,7 @@ class EzbV1Helper( object ):
         """ Stub for validation. IP checking another possibility.
             Calling function expects 'good' message, or displays message as error.
             Called by views.ezb_v1(). """
+        parser = Parser()
         message = 'init'
         if key not in self.legit_services:
             message = 'query_key bad'
@@ -274,5 +274,25 @@ class Parser( object ):
             bib = None
         log.debug( 'bib, `%s`' % bib )
         return bib
+
+    def validate_isbn( self, isbn ):
+        """ Returns boolean.
+            Called by TBD """
+        if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
+            rslt = True
+        else:
+            rslt = False
+            log.debug( 'isbn, `%s` is not valid' )
+        return rslt
+
+    # def validate_isbn( self, isbn ):
+    #     """ Returns boolean.
+    #         Called by TBD """
+    #     if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
+    #         rslt = True
+    #     else:
+    #         rslt = False
+    #         log.debug( 'isbn, `%s` is not valid' )
+    #     return rslt
 
     ## end Parser()

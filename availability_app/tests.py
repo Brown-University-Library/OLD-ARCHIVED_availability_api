@@ -4,7 +4,7 @@ import datetime, json, logging, pprint
 from availability_app import settings_app
 from django.conf import settings as project_settings
 from django.test import TestCase
-from availability_app.lib.log_parser import LogParser
+from availability_app.lib.ezb_v1_handler import Parser
 
 
 log = logging.getLogger(__name__)
@@ -15,19 +15,27 @@ class ValidityTest( TestCase ):
     """ Checks submitted identifier. """
 
     def setUp(self):
-        self.parser = LogParser()
+        self.parser = Parser()
 
     def test_good_short_isbn(self):
         isbn = '0688002307'
         self.assertEqual( True, self.parser.validate_isbn(isbn) )
+        self.assertEqual( 2, self.parser.EAN13 )
 
     def test_good_long_isbn(self):
         isbn = '9780688002305'
         self.assertEqual( True, self.parser.validate_isbn(isbn) )
+        self.assertEqual( 2, self.parser.EAN13 )
 
     def test_bad_isbn(self):
         isbn = '123'
         self.assertEqual( False, self.parser.validate_isbn(isbn) )
+        self.assertEqual( 2, self.parser.EAN13 )
+
+    def test_problematic_isbn(self):
+        isbn = '0415232015(cased)'
+        self.assertEqual( True, self.parser.validate_isbn(isbn) )
+        self.assertEqual( '9780415232012z', self.parser.EAN13 )
 
     ## end ValidityTest()
 

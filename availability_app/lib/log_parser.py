@@ -5,7 +5,6 @@ Parser for custom log.
 """
 
 import datetime, json, logging, os, pickle, pprint, subprocess, urllib
-import isbnlib
 from availability_app import settings_app
 
 
@@ -16,7 +15,7 @@ class LogParser( object ):
     """ Custom log parser. """
 
     def __init__( self ):
-        pass
+        self.EAN13 = None  # validated-canonical 13-digit isbn
 
     def get_date( self, date_string ):
         """ Returns date-object.
@@ -25,15 +24,5 @@ class LogParser( object ):
         dt = datetime.datetime.strptime( dt_str_1, '%Y-%m-%dT%H:%M:%S.%f' )
         log.debug( 'dt, `%s`' % str(dt) )
         return dt
-
-    def validate_isbn( self, isbn ):
-        """ Returns boolean.
-            Called by TBD """
-        if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
-            rslt = True
-        else:
-            rslt = False
-            log.debug( 'isbn, `%s` is not valid' )
-        return rslt
 
     ## end LogParser()
