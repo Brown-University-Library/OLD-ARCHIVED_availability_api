@@ -40,24 +40,26 @@ def info( request ):
 #     log.debug( 'starting; id_type, `%s`; id_value, `%s`' % (id_type, id_value) )
 #     validation = ezb1_helper.validate( id_type, id_value )
 #     if not validation == 'good':
-#         data_dct = { 'query': query, u'response': {u'error': validation} }
+#         data_dct = { 'query': ezb1_helper.build_query_dct( request, datetime.datetime.now() ), u'response': {u'error': validation} }
+#         jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
+#         return HttpResponseBadRequest( jsn, content_type=u'application/javascript; charset=utf-8' )
 #     else:
 #         data_dct = ezb1_helper.build_data_dct( id_type, id_value, request.GET.get('show_marc', ''), request )
-#     jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
-#     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
+#         jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
+#         return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
 
 def ezb_v1( request, id_type, id_value ):
     """ Handles existing easyborrow-api call. """
     params = request.GET
     log.debug( 'starting; id_type, `%s`; id_value, `%s`' % (id_type, id_value) )
-    validation = ezb1_helper.validate( id_type, id_value )
-    if not validation == 'good':
-        data_dct = { 'query': ezb1_helper.build_query_dct( request, datetime.datetime.now() ), u'response': {u'error': validation} }
+    validity_dct = ezb1_helper.validate( id_type, id_value )
+    if validity_dct['validity'] is not True:
+        data_dct = { 'query': ezb1_helper.build_query_dct( request, datetime.datetime.now() ), u'response': {u'error': validity_dct['error']} }
         jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
         return HttpResponseBadRequest( jsn, content_type=u'application/javascript; charset=utf-8' )
     else:
-        data_dct = ezb1_helper.build_data_dct( id_type, id_value, request.GET.get('show_marc', ''), request )
+        data_dct = ezb1_helper.build_data_dct( id_type, validity_dct['value'], request.GET.get('show_marc', ''), request )
         jsn = json.dumps( data_dct, sort_keys=True, indent=2 )
         return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
