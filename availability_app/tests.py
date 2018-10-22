@@ -119,8 +119,6 @@ class UrlTest( TestCase ):
     def test_info(self):
         """ Checks '/availability_api/info/' """
         response = self.client.get( '/info/' )  # project root part of url is assumed
-        # log.debug( 'response, ```%s```' % response )
-        # log.debug( 'response.content, ```%s```' % response.content )
         response_dct = json.loads( response.content )
         self.assertEqual( 200, response.status_code )  # permanent redirect
         self.assertTrue(  b'time' in response.content )
@@ -148,6 +146,19 @@ class V1_UrlTest( TestCase ):
         self.assertTrue( '"bib": "b2814930"' in content )
         self.assertTrue( 'Kongolese Saint Anthony' in content )
         self.assertTrue( 'Africa and Africans' in content )
+
+    def test_other_holdings_isbn(self):
+        """ Checks `ezb_other_holdings` part of `basics` response. """
+        expected = {
+            'callNumber': 'WW Z2 M99w Suppl. ',
+            'localLocation': 'HAY HARRIS',
+            'publicNote': 'USE IN LIBRARY',
+            'title': 'Supplement to "Walt Whitman, a descriptive bibliography" /',
+            'url': 'https://search.library.brown.edu/catalog/b5707094' }
+        response = self.client.get( '/v1/isbn/9781587299803/' )  # hay-harris Walt Whitman holding
+        jdct = json.loads( response.content )
+        result = jdct['response']['basics']['ezb_other_holdings'][0]
+        self.assertEqual( expected, result )
 
     # def test_invalid_key(self):
     #     """ Checks non 'isbn' or 'oclc' key. """
