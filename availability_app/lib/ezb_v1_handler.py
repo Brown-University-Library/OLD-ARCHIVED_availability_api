@@ -26,22 +26,6 @@ class EzbV1Helper( object ):
         self.ezb_available_locations = None
         self.ezb_available_statuses = None
 
-    # def validate( self, key, value ):
-    #     """ Stub for validation. IP checking another possibility.
-    #         Calling function expects 'good' message, or displays message as error.
-    #         Called by views.ezb_v1(). """
-    #     validator = Validator()
-    #     message = 'init'
-    #     if key not in self.legit_services:
-    #         message = 'query_key bad'
-    #     elif key == 'isbn':
-    #             if validator.validate_isbn(value) is False:
-    #                 message = 'bad isbn'
-    #     if message == 'init':
-    #         message = 'good'
-    #     log.debug( 'message, {}'.format(message) )
-    #     return message
-
     def validate( self, key, value ):
         """ Initial validator. IP checking another possibility.
             Returns dct because isbn value may be changed.
@@ -104,33 +88,6 @@ class EzbV1Helper( object ):
         output, error = process.communicate()  # receive output from the python2 script
         log.debug( 'output, ```%s```; error, ```%s```' % (output, error) )
         return output
-
-    # def build_query_dct( self, request, rq_now ):
-    #     query_dct = {
-    #         'url': '%s://%s%s' % ( request.scheme,
-    #             request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
-    #             request.META.get('REQUEST_URI', request.META['PATH_INFO'])
-    #             ),
-    #         'timestamp': str( rq_now )
-    #         }
-    #     log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
-    #     return query_dct
-
-    # def build_query_dct( self, request, rq_now ):
-    #     """ Builds query-dct part of response.
-    #         Called by: build_data_dct() """
-    #     query_dct = {
-    #         'url': '%s://%s%s' % ( request.scheme,
-    #             request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
-    #             request.META.get('REQUEST_URI', request.META['PATH_INFO'])
-    #             ),
-    #         'timestamp': str( rq_now )
-    #         }
-    #     log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
-    #     stats_dct = query_dct.copy()
-    #     stats_dct['source'] = self.log_source( request )
-    #     slog.info( json.dumps(stats_dct) )
-    #     return query_dct
 
     def build_query_dct( self, request, rq_now ):
         """ Builds query-dct part of response.
@@ -211,66 +168,28 @@ class EzbV1Helper( object ):
         log.debug( 'items, ```%s```' % items )
         return items
 
-    # def build_holdings_dct( self, unpickled_dct ):
-    #     """ Processes z3950 data into response.
-    #         Called by build_data_dct() """
-    #     items = []
-    #     z_items = unpickled_dct['backend_response']
-    #     for z_item in z_items:
-    #         pymrc_obj = z_item['pymarc_obj']
-    #         log.debug( 'pymrc_obj.as_dict(), ```%s```' % pprint.pformat(pymrc_obj.as_dict()) )
-    #         holdings = z_item['holdings_data']
-    #         #
-    #         # log.debug( 'bib?, ```%s```' % pymrc_obj.get_fields('907')[0].format_field() )
-    #         #
-    #         notes_val = []
-    #         notes = pymrc_obj.notes()
-    #         for note in notes:
-    #             notes_val.append( note.format_field() )
-    #         #
-    #         phys_desc_val = []
-    #         physicaldescriptions = pymrc_obj.physicaldescription()
-    #         for phys_desc in physicaldescriptions:
-    #             phys_desc_val.append( phys_desc.format_field() )
-    #         #
-    #         series_val = []
-    #         series_entries = pymrc_obj.series()
-    #         for series in series_entries:
-    #             series_val.append( series.format_field() )
-    #         #
-    #         subjects_val = []
-    #         subjects = pymrc_obj.subjects()
-    #         for subject in subjects:
-    #             subjects_val.append( subject.format_field() )
-    #         #
-    #         item_dct = {
-    #             'bib': self.parser.grab_bib( pymrc_obj ),
-    #             'author': pymrc_obj.author(),
-    #             'isbn': pymrc_obj.isbn(),
-    #             'location': pymrc_obj.location(),
-    #             'notes': notes_val,
-    #             'physicaldescription': phys_desc_val,
-    #             'publisher': pymrc_obj.publisher(),
-    #             'pubyear': pymrc_obj.pubyear(),
-    #             'series': series_val,
-    #             'subjects': subjects_val,
-    #             'title': pymrc_obj.title(),
-    #             'uniformtitle': pymrc_obj.uniformtitle(),
-    #             'holdings': holdings }
-    #         items.append( item_dct )
-    #     log.debug( 'items, ```%s```' % items )
-    #     return items
-
     def build_summary_dct( self, sierra_holdings ):
-        """ Builds simple summary data.
+        """ Builds summary data needed by easyBorrow.
             Called by build_data_dct() """
         self.prep_ezb_available_locations()
         self.prep_ezb_available_statuses()
-        summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [], 'online_holdings': [] }
+        summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [], 'online_holdings': [], 'ezb_other_holdings': [] }
         summary_dct = self.determine_ezb_requestability( sierra_holdings, summary_dct )
         summary_dct = self.check_online_holdings( sierra_holdings, summary_dct )
+        summary_dct = self.check_other_holdings( sierra_holdings, summary_dct )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
+
+    # def build_summary_dct( self, sierra_holdings ):
+    #     """ Builds simple summary data.
+    #         Called by build_data_dct() """
+    #     self.prep_ezb_available_locations()
+    #     self.prep_ezb_available_statuses()
+    #     summary_dct = { 'ezb_available_bibs': [], 'ezb_available_holdings': [], 'online_holdings': [] }
+    #     summary_dct = self.determine_ezb_requestability( sierra_holdings, summary_dct )
+    #     summary_dct = self.check_online_holdings( sierra_holdings, summary_dct )
+    #     log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
+    #     return summary_dct
 
     def determine_ezb_requestability( self, sierra_holdings, summary_dct ):
         """ Returns boolean for easyBorrow requestability.
@@ -299,6 +218,19 @@ class EzbV1Helper( object ):
                     online_holding_info['title'] = item['title']
                     online_holding_info['url'] = 'https://search.library.brown.edu/catalog/%s' % item['bib']
                     summary_dct['online_holdings'].append( online_holding_info )
+        log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
+        return summary_dct
+
+    def check_other_holdings( self, sierra_holdings, summary_dct ):
+        """ Adds any online holdings to the summary basics dct.
+            Called by: build_summary_dct() """
+        for item in sierra_holdings:
+            for holding_info in item['holdings']:
+                if 'hay' in holding_info['localLocation'].lower():
+                    other_holding_info = holding_info.copy()
+                    other_holding_info['title'] = item['title']
+                    other_holding_info['url'] = 'https://search.library.brown.edu/catalog/%s' % item['bib']
+                    summary_dct['ezb_other_holdings'].append( other_holding_info )
         log.debug( 'summary_dct, ```%s```' % pprint.pformat(summary_dct) )
         return summary_dct
 
@@ -361,16 +293,6 @@ class Validator( object ):
             rslt = False
             log.debug( 'isbn, `%s` is not valid' )
         return rslt
-
-    # def validate_isbn( self, isbn ):
-    #     """ Returns boolean.
-    #         Called by TBD """
-    #     if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
-    #         rslt = True
-    #     else:
-    #         rslt = False
-    #         log.debug( 'isbn, `%s` is not valid' )
-    #     return rslt
 
     ## end Validator()
 
