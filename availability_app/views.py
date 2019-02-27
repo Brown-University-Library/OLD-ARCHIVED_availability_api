@@ -73,7 +73,7 @@ def locations_and_statuses( request ):
     """ Shows values being used. """
     rq_now = datetime.datetime.now()
     data_dct = {
-        'query': ezb1_helper.build_query_dict( request, rq_now ),
+        'query': ezb1_helper.build_query_dct( request, rq_now ),
         'response': {
             'ezb_available_locations': json.loads( os.environ['AVL_API__EZB_AVAILABLE_LOCATIONS'] ),
             'ezb_available_statuses': json.loads( os.environ['AVL_API__EZB_AVAILABLE_STATUSES'] ),
