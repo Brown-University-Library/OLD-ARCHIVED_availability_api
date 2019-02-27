@@ -124,6 +124,14 @@ class UrlTest( TestCase ):
         self.assertTrue(  b'time' in response.content )
         self.assertEqual( ['documentation', 'elapsed_time', 'version'], sorted(list(response_dct['response'].keys())) )
 
+    def test_locations_and_statuses(self):
+        """ Checks '/availability_api/locations_and_statuses/' """
+        response = self.client.get( '/locations_and_statuses/' )  # project root part of url is assumed
+        response_dct = json.loads( response.content )
+        self.assertEqual( 200, response.status_code )  # permanent redirect
+        self.assertTrue(  b'time' in response.content )
+        self.assertEqual( ['ezb_available_locations', 'ezb_available_statuses', 'time_taken'], sorted(list(response_dct['response'].keys())) )
+
     ## end class UrlTest()
 
 
