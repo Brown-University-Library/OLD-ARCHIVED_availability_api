@@ -4,6 +4,7 @@ Helper for views.v2_bib()
 
 import datetime, logging, os, pprint
 
+from availability_app.lib.sierra_api import SierraConnector
 # from availability_app import settings_app
 
 
@@ -30,13 +31,14 @@ class BibInfo:
     def prep_data( self, bib ):
         """ Grabs and processes data from Sierra.
             Called by: views.v2_bib() """
+        sierra = SierraConnector()  # instantiated here to get fresh token
+        sierra.get_bibinfo( bib )
         return 'foo'
 
     def build_response_dct( self, data_dct, start_stamp ):
         """ Yup.
             Called by views.v2_bib() """
-        return {}
-
+        return { 'time_taken': str( datetime.datetime.now() - start_stamp ) }
 
     # def build_stats_dct( self, query_url, referrer, user_agent, ip ):
     #     """ Builds and logs data for stats.
