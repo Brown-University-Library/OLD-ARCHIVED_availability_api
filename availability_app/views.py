@@ -5,6 +5,7 @@ import datetime, json, logging, os, pprint
 from availability_app import settings_app
 from availability_app.lib import view_info_helper
 from availability_app.lib.ezb_v1_handler import EzbV1Helper
+from availability_app.lib.bib_v2 import BibInfo
 from availability_app.lib.stats_v1_handler import StatsValidator, StatsBuilder
 from django.conf import settings as project_settings
 from django.contrib.auth import logout
@@ -18,6 +19,7 @@ slog = logging.getLogger( 'stats_logger' )
 ezb1_helper = EzbV1Helper()
 stats_builder = StatsBuilder()
 stats_validator = StatsValidator()
+bib_info = BibInfo()
 
 
 def info( request ):
@@ -71,6 +73,7 @@ def ezb_v1_stats( request ):
 
 def v2_bib( request, bib_value ):
     """ Handles upcoming easyborrow-api call. """
+    query_dct = bib_info.build_query_dct( request, datetime.datetime.now() )
     return HttpResponse( 'v2_bib handling coming' )
 
 
