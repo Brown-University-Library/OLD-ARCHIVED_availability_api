@@ -64,9 +64,14 @@ def ezb_v1_stats( request ):
     return HttpResponse( stats_builder.output, content_type=u'application/javascript; charset=utf-8' )
 
 
-def ezb_v2( request, id_type, id_value ):
+# def ezb_v2( request, id_type, id_value ):
+#     """ Handles upcoming easyborrow-api call. """
+#     return HttpResponse( 'ezb_v2_url handling coming' )
+
+
+def v2_bib( request, bib_value ):
     """ Handles upcoming easyborrow-api call. """
-    return HttpResponse( 'ezb_v2_url handling coming' )
+    return HttpResponse( 'v2_bib handling coming' )
 
 
 def locations_and_statuses( request ):
