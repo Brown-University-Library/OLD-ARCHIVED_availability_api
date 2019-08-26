@@ -76,7 +76,7 @@ def v2_bib( request, bib_value ):
     log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
     start_stamp = datetime.datetime.now()
     query_dct = bib_info.build_query_dct( request, start_stamp )
-    data_dct = bib_info.prep_data( request )
+    data_dct = bib_info.prep_data( bib_value )
     response_dct = bib_info.build_response_dct( data_dct, start_stamp )
     jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
