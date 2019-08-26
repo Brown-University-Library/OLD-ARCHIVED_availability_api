@@ -27,15 +27,48 @@ class BibInfo:
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    def build_stats_dct( self, query_url, referrer, user_agent, ip ):
-        """ Builds and logs data for stats.
-            Called by build_query_dct() """
-        stats_dct = { 'datetime': datetime.datetime.now().isoformat(), 'query': query_url, 'referrer': None, 'user_agent': user_agent, 'ip': ip }
-        if referrer:
-            output = urllib.parse.urlparse( referrer )
-            stats_dct['referrer'] = output
-        slog.info( json.dumps(stats_dct) )
-        return
+    def prep_data( self, bib ):
+        """ Grabs and processes data from Sierra.
+            Called by: views.v2_bib() """
+        return 'foo'
+
+    def build_response_dct( self, data_dct, start_stamp ):
+        """ Yup.
+            Called by views.v2_bib() """
+        return {}
+
+
+    # def build_stats_dct( self, query_url, referrer, user_agent, ip ):
+    #     """ Builds and logs data for stats.
+    #         Called by build_query_dct() """
+    #     stats_dct = { 'datetime': datetime.datetime.now().isoformat(), 'query': query_url, 'referrer': None, 'user_agent': user_agent, 'ip': ip }
+    #     if referrer:
+    #         output = urllib.parse.urlparse( referrer )
+    #         stats_dct['referrer'] = output
+    #     slog.info( json.dumps(stats_dct) )
+    #     return
+
+    def add_check_digit( self, raw_item_id ):
+        """ Not yet used.
+            Logic based on: <https://csdirect.iii.com/sierrahelp/Content/sril/sril_records_numbers.html> """
+        data = str(raw_item_id).replace('-', '').replace(' ', '')  # Removes Hyphens and Spaces
+        reversed = ''.join( reversed(data) )
+        total = 0
+        for counter,character in enumerate( reversed ):
+            log.debug( f'character, `{character}`' )
+            one_index = counter + 1
+            log.debug( f'one_index, `{one_index}`' )
+            multiplyer = one_index + 1
+            log.debug( f'multiplyer, `{multiplyer}`' )
+            multiplied = int(character) * multiplyer
+            log.debug( f'multiplied, `{multiplied}`' )
+            total += multiplied
+            log.debug( f'total, `{total}`' )
+        check_digit = (total % 11)
+        if check_digit == 10:
+            check_digit = 'x'
+        log.debug( f'check_digit, `{check_digit}`' )
+        return check_digit
 
     ## end class BibInfo
 
