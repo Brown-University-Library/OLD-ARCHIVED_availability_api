@@ -137,5 +137,30 @@ class BibItemsInfo:
     #     slog.info( json.dumps(stats_dct) )
     #     return
 
+    import json, pprint
+    import requests
+
+    def get_945_item_id_list( self, bib ):
+        """ Not yet used; experimental. """
+        # bib = 'b1153984'
+        item_ids = []
+        url = f'https://search.library.brown.edu/catalog/{bib}.json'
+        r = requests.get( url )
+        dct = r.json()
+        marc_string = dct['response']['document']['marc_display']
+        marc_dct = json.loads( marc_string )
+        fields = marc_dct['fields']
+        for field_dct in fields:
+            ( key, value_dct ) = list( field_dct.items() )[0]
+            if key == '945':
+                subfields = value_dct['subfields']
+                for subfield_dct in subfields:
+                    ( key2, value2 ) = list( subfield_dct.items() )[0]
+                    if key2 == 'y':
+                        item_ids.append( value2 )
+                        break
+        log.debug( f'item_ids, ```{item_ids}```' )
+        return item_ids
+
     ## end class BibInfo
 
