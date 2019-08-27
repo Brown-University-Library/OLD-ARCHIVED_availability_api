@@ -5,7 +5,7 @@ import datetime, json, logging, os, pprint
 from availability_app import settings_app
 from availability_app.lib import view_info_helper
 from availability_app.lib.ezb_v1_handler import EzbV1Helper
-from availability_app.lib.bib_v2 import BibInfo
+from availability_app.lib.bib_items_v2 import BibItemsInfo
 from availability_app.lib.stats_v1_handler import StatsValidator, StatsBuilder
 from django.conf import settings as project_settings
 from django.contrib.auth import logout
@@ -19,7 +19,7 @@ slog = logging.getLogger( 'stats_logger' )
 ezb1_helper = EzbV1Helper()
 stats_builder = StatsBuilder()
 stats_validator = StatsValidator()
-bib_info = BibInfo()
+bib_items = BibItemsInfo()
 
 
 def info( request ):
@@ -71,13 +71,13 @@ def ezb_v1_stats( request ):
 #     return HttpResponse( 'ezb_v2_url handling coming' )
 
 
-def v2_bib( request, bib_value ):
+def v2_bib_items( request, bib_value ):
     """ Handles upcoming easyborrow-api call. """
     log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
     start_stamp = datetime.datetime.now()
-    query_dct = bib_info.build_query_dct( request, start_stamp )
-    data_dct = bib_info.prep_data( bib_value )
-    response_dct = bib_info.build_response_dct( data_dct, start_stamp )
+    query_dct = bib_items.build_query_dct( request, start_stamp )
+    data_dct = bib_items.prep_data( bib_value )
+    response_dct = bib_items.build_response_dct( data_dct, start_stamp )
     jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 

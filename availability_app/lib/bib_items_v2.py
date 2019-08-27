@@ -11,7 +11,7 @@ from availability_app.lib.sierra_api import SierraConnector
 log = logging.getLogger(__name__)
 
 
-class BibInfo:
+class BibItemsInfo:
 
     def build_query_dct( self, request, rq_now ):
         """ Builds query-dct part of response.
@@ -32,7 +32,7 @@ class BibInfo:
         """ Grabs and processes data from Sierra.
             Called by: views.v2_bib() """
         sierra = SierraConnector()  # instantiated here to get fresh token
-        raw_data = sierra.get_bibinfo( bib )
+        raw_data = sierra.get_bib_items_info( bib )
         items = self.summarize_data( raw_data )
         response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_data, 'sierra_api_query': sierra.url }
         log.debug( f'response_dct, ```{response_dct}```' )
