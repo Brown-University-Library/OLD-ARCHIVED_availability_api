@@ -71,7 +71,7 @@ class BibItemsInfo:
         """ Adds '.i' and check-digit to item-id.
             Called by summarize_data() """
         check_digit = self.build_check_digit( initial_item_id )
-        built_item_id = f'.i{initial_item_id}{check_digit}'
+        built_item_id = f'i{initial_item_id}{check_digit}'
         log.debug( 'built_item_id, `{built_item_id}`' )
         return built_item_id
 
