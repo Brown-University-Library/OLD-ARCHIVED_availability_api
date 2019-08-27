@@ -2,10 +2,9 @@
 Helper for views.v2_bib()
 """
 
-import datetime, logging, os, pprint
+import datetime, logging, operator, os, pprint
 
 from availability_app.lib.sierra_api import SierraConnector
-# from availability_app import settings_app
 
 
 log = logging.getLogger(__name__)
@@ -38,11 +37,29 @@ class BibItemsInfo:
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
+    # def summarize_data( self, raw_data ):
+    #     """ Extracts essential data from sierra-api data.
+    #         Called by prep_data() """
+    #     items = []
+    #     for entry in raw_data['entries']:
+    #         item_dct = {
+    #             'barcode': entry['barcode'],
+    #             'callnumber': self.build_callnumber( entry ),
+    #             'item_id': self.build_item_id( entry['id'] ),
+    #             'location': entry['location']['name'],
+    #             'status': entry['status']['display']
+    #         }
+    #         items.append( item_dct )
+    #     log.debug( f'items, ```{pprint.pformat(items)}```' )
+    #     return items
+
     def summarize_data( self, raw_data ):
         """ Extracts essential data from sierra-api data.
             Called by prep_data() """
         items = []
-        for entry in raw_data['entries']:
+        initial_entries = raw_data['entries']  # initial_entries is a list of dicts
+        sorted_entries = sorted( initial_entries, key=operator.itemgetter('id') )
+        for entry in sorted_entries:
             item_dct = {
                 'barcode': entry['barcode'],
                 'callnumber': self.build_callnumber( entry ),
