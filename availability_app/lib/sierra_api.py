@@ -18,6 +18,7 @@ class SierraConnector( object ):
         # self.INVALID_PARAM_FILE_URL = os.environ['SBE__INVALID_PARAM_FILE_URL']
         # self.chunk_number_of_bibs = json.loads( os.environ['SBE__CHUNK_NUMBER_OF_BIBS_JSON'] )  # normally null -> None, or an int
         self.token = self.get_token()
+        self.url = ''
 
     def get_token( self ):
         """ Gets API token.
@@ -62,10 +63,14 @@ class SierraConnector( object ):
         url = f'{settings_app.SIERRA_API_ROOT_URL}/items'
         log.debug( f'bib-url, ```{url}```' )
         custom_headers = {'Authorization': f'Bearer {self.token}' }
-        payload = { 'bibIds': f'{sliced_bib}' }
+        payload = {
+            'bibIds': f'{sliced_bib}',
+            'fields': 'default,varFields,fixedFields'
+            }  # HC: url += "&fields=default,varFields,fixedFields"
         try:
             r = requests.get( url, headers=custom_headers, params=payload, timeout=30 )
             log.debug( f'r.status_code, `{r.status_code}`; ```{r.url}```; r.content, ```{r.content}```' )
+            self.url = r.url
             return r.json()
         except:
             log.exception( 'problem hitting api; traceback follows' )
