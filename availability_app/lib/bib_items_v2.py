@@ -66,19 +66,6 @@ class BibItemsInfo:
         log.debug( f'sorted_entries, ```{pprint.pformat(sorted_entries)}```' )
         return sorted_entries
 
-    # def build_callnumber( self, entry ):
-    #     """ Adds data to default callnumber field.
-    #         Called by summarize_data() """
-    #     initial_callnumber = entry['callNumber']
-    #     addition = ''
-    #     if 'varFields' in entry.keys():
-    #         for var_field_dct in entry['varFields']:
-    #             if var_field_dct.get( 'fieldTag', '' ) == 'v':
-    #                 addition = var_field_dct['content']  # i.e. "Box 10"
-    #     built_callnumber = f'{initial_callnumber} {addition}'.strip()
-    #     log.debug( f'built_callnumber, `{built_callnumber}`' )
-    #     return built_callnumber
-
     def build_callnumber( self, entry ):
         """ Adds data to default callnumber field.
             Called by summarize_data() """
@@ -87,12 +74,12 @@ class BibItemsInfo:
         if 'varFields' in entry.keys():
             for var_field_dct in entry['varFields']:
                 if var_field_dct.get( 'fieldTag', '' ) == 'v':
-                    addition = var_field_dct['content']  # ie "Box 10"
+                    addition = var_field_dct['content']  # eg "Box 10"
         built_callnumber = f'{initial_callnumber} {addition}'.strip()
         addition2 = ''
         if 'fixedFields' in entry.keys():
             for ( key, value_dct ) in entry['fixedFields'].items():
-                if key == '58':  # eg "label": "COPY #"
+                if key == '58':  # then value_dct, eg, {"label": "COPY #", "value": "2"}
                     if int( value_dct['value'] ) > 1:
                         addition2 = f'c.{value_dct["value"]}'   # resulting in, eg, c.2
         built_callnumber = f'{built_callnumber} {addition2}'.strip()
@@ -116,12 +103,9 @@ class BibItemsInfo:
         total = 0
         for counter,character in enumerate( reversed_data ):
             log.debug( f'character, `{character}`' )
-            one_index = counter + 1
-            log.debug( f'one_index, `{one_index}`' )
-            multiplyer = one_index + 1
-            log.debug( f'multiplyer, `{multiplyer}`' )
-            multiplied = int(character) * multiplyer
-            log.debug( f'multiplied, `{multiplied}`' )
+            one_index = counter + 1; log.debug( f'one_index, `{one_index}`' )
+            multiplyer = one_index + 1; log.debug( f'multiplyer, `{multiplyer}`' )
+            multiplied = int(character) * multiplyer; log.debug( f'multiplied, `{multiplied}`' )
             total += multiplied
             log.debug( f'total, `{total}`' )
         check_digit = (total % 11)
@@ -134,10 +118,6 @@ class BibItemsInfo:
         """ Yup.
             Called by views.v2_bib() """
         response_dct = data_dct
-        # response_dct = {
-        #     'time_taken': str( datetime.datetime.now() - start_stamp ),
-        #     'sierra_api': data_dct
-        #      }
         response_dct['time_taken'] = str( datetime.datetime.now() - start_stamp )
         log.debug( f'response_dct, ```{pprint.pformat(response_dct)}```' )
         return response_dct
@@ -151,27 +131,6 @@ class BibItemsInfo:
     #         stats_dct['referrer'] = output
     #     slog.info( json.dumps(stats_dct) )
     #     return
-
-    # def get_945_item_id_list( self, bib ):
-    #     """ Not yet used; experimental. """
-    #     item_ids = []
-    #     url = f'https://search.library.brown.edu/catalog/{bib}.json'
-    #     r = requests.get( url )
-    #     dct = r.json()
-    #     marc_string = dct['response']['document']['marc_display']
-    #     marc_dct = json.loads( marc_string )
-    #     fields = marc_dct['fields']
-    #     for field_dct in fields:
-    #         ( key, value_dct ) = list( field_dct.items() )[0]
-    #         if key == '945':
-    #             subfields = value_dct['subfields']
-    #             for subfield_dct in subfields:
-    #                 ( key2, value2 ) = list( subfield_dct.items() )[0]
-    #                 if key2 == 'y':
-    #                     item_ids.append( value2[2:-1] )  # raw value2 is like '.i159930728' -- this drops the '.i' and the check-digit
-    #                     break
-    #     log.debug( f'item_ids, ```{item_ids}```' )
-    #     return item_ids
 
     def get_945_item_id_list( self, bib ):
         """ Not yet used; experimental. """
