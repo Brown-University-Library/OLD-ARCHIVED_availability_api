@@ -2,8 +2,9 @@
 Helper for views.v2_bib()
 """
 
-import datetime, logging, operator, os, pprint
+import datetime, json, logging, operator, os, pprint
 
+import requests
 from availability_app.lib.sierra_api import SierraConnector
 
 
@@ -32,7 +33,7 @@ class BibItemsInfo:
             Called by: views.v2_bib() """
         sierra = SierraConnector()  # instantiated here to get fresh token
         raw_data = sierra.get_bib_items_info( bib )
-        items = self.summarize_data( raw_data )
+        items = self.summarize_data( raw_data, bib )
         response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_data, 'sierra_api_query': sierra.url }
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
@@ -53,12 +54,30 @@ class BibItemsInfo:
     #     log.debug( f'items, ```{pprint.pformat(items)}```' )
     #     return items
 
-    def summarize_data( self, raw_data ):
+    # def summarize_data( self, raw_data ):
+    #     """ Extracts essential data from sierra-api data.
+    #         Called by prep_data() """
+    #     items = []
+    #     initial_entries = raw_data['entries']  # initial_entries is a list of dicts
+    #     sorted_entries = sorted( initial_entries, key=operator.itemgetter('id') )
+    #     for entry in sorted_entries:
+    #         item_dct = {
+    #             'barcode': entry['barcode'],
+    #             'callnumber': self.build_callnumber( entry ),
+    #             'item_id': self.build_item_id( entry['id'] ),
+    #             'location': entry['location']['name'],
+    #             'status': entry['status']['display']
+    #         }
+    #         items.append( item_dct )
+    #     log.debug( f'items, ```{pprint.pformat(items)}```' )
+    #     return items
+
+    def summarize_data( self, raw_data, bib ):
         """ Extracts essential data from sierra-api data.
             Called by prep_data() """
         items = []
         initial_entries = raw_data['entries']  # initial_entries is a list of dicts
-        sorted_entries = sorted( initial_entries, key=operator.itemgetter('id') )
+        sorted_entries = self.sort_entries( initial_entries, bib )
         for entry in sorted_entries:
             item_dct = {
                 'barcode': entry['barcode'],
@@ -70,6 +89,20 @@ class BibItemsInfo:
             items.append( item_dct )
         log.debug( f'items, ```{pprint.pformat(items)}```' )
         return items
+
+
+
+    def sort_entries( self, initial_entries, bib ):
+        """ Gets the 945 order, and sorts entries according to that order.
+            Called by summarize_data() """
+        ordered_945_item_ids = self.get_945_item_id_list( bib )
+        order_dct = { order_945: index for index, order_945 in enumerate(ordered_945_item_ids) }
+        log.debug( f'order_dct, ```{pprint.pformat(order_dct)}```' )
+        sorted_entries = sorted( initial_entries, key=lambda x: order_dct[x['id']] )
+        log.debug( f'sorted_entries, ```{pprint.pformat(sorted_entries)}```' )
+        return sorted_entries
+
+
 
     def build_callnumber( self, entry ):
         """ Adds data to default callnumber field.
@@ -128,7 +161,7 @@ class BibItemsInfo:
         return response_dct
 
     # def build_stats_dct( self, query_url, referrer, user_agent, ip ):
-    #     """ Builds and logs data for stats.
+    #     """ Builds and logs data for stats. Not yet implemented for this url-path
     #         Called by build_query_dct() """
     #     stats_dct = { 'datetime': datetime.datetime.now().isoformat(), 'query': query_url, 'referrer': None, 'user_agent': user_agent, 'ip': ip }
     #     if referrer:
@@ -137,27 +170,42 @@ class BibItemsInfo:
     #     slog.info( json.dumps(stats_dct) )
     #     return
 
-    import json, pprint
-    import requests
+    # def get_945_item_id_list( self, bib ):
+    #     """ Not yet used; experimental. """
+    #     item_ids = []
+    #     url = f'https://search.library.brown.edu/catalog/{bib}.json'
+    #     r = requests.get( url )
+    #     dct = r.json()
+    #     marc_string = dct['response']['document']['marc_display']
+    #     marc_dct = json.loads( marc_string )
+    #     fields = marc_dct['fields']
+    #     for field_dct in fields:
+    #         ( key, value_dct ) = list( field_dct.items() )[0]
+    #         if key == '945':
+    #             subfields = value_dct['subfields']
+    #             for subfield_dct in subfields:
+    #                 ( key2, value2 ) = list( subfield_dct.items() )[0]
+    #                 if key2 == 'y':
+    #                     item_ids.append( value2[2:-1] )  # raw value2 is like '.i159930728' -- this drops the '.i' and the check-digit
+    #                     break
+    #     log.debug( f'item_ids, ```{item_ids}```' )
+    #     return item_ids
 
     def get_945_item_id_list( self, bib ):
         """ Not yet used; experimental. """
-        # bib = 'b1153984'
         item_ids = []
         url = f'https://search.library.brown.edu/catalog/{bib}.json'
         r = requests.get( url )
         dct = r.json()
         marc_string = dct['response']['document']['marc_display']
         marc_dct = json.loads( marc_string )
-        fields = marc_dct['fields']
-        for field_dct in fields:
+        for field_dct in marc_dct['fields']:
             ( key, value_dct ) = list( field_dct.items() )[0]
             if key == '945':
-                subfields = value_dct['subfields']
-                for subfield_dct in subfields:
+                for subfield_dct in value_dct['subfields']:
                     ( key2, value2 ) = list( subfield_dct.items() )[0]
                     if key2 == 'y':
-                        item_ids.append( value2 )
+                        item_ids.append( value2[2:-1] )  # raw value2 is like '.i159930728' -- this drops the '.i' and the check-digit
                         break
         log.debug( f'item_ids, ```{item_ids}```' )
         return item_ids
