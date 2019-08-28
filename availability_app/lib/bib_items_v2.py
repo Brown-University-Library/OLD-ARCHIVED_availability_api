@@ -38,40 +38,6 @@ class BibItemsInfo:
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
-    # def summarize_data( self, raw_data ):
-    #     """ Extracts essential data from sierra-api data.
-    #         Called by prep_data() """
-    #     items = []
-    #     for entry in raw_data['entries']:
-    #         item_dct = {
-    #             'barcode': entry['barcode'],
-    #             'callnumber': self.build_callnumber( entry ),
-    #             'item_id': self.build_item_id( entry['id'] ),
-    #             'location': entry['location']['name'],
-    #             'status': entry['status']['display']
-    #         }
-    #         items.append( item_dct )
-    #     log.debug( f'items, ```{pprint.pformat(items)}```' )
-    #     return items
-
-    # def summarize_data( self, raw_data ):
-    #     """ Extracts essential data from sierra-api data.
-    #         Called by prep_data() """
-    #     items = []
-    #     initial_entries = raw_data['entries']  # initial_entries is a list of dicts
-    #     sorted_entries = sorted( initial_entries, key=operator.itemgetter('id') )
-    #     for entry in sorted_entries:
-    #         item_dct = {
-    #             'barcode': entry['barcode'],
-    #             'callnumber': self.build_callnumber( entry ),
-    #             'item_id': self.build_item_id( entry['id'] ),
-    #             'location': entry['location']['name'],
-    #             'status': entry['status']['display']
-    #         }
-    #         items.append( item_dct )
-    #     log.debug( f'items, ```{pprint.pformat(items)}```' )
-    #     return items
-
     def summarize_data( self, raw_data, bib ):
         """ Extracts essential data from sierra-api data.
             Called by prep_data() """
@@ -80,7 +46,7 @@ class BibItemsInfo:
         sorted_entries = self.sort_entries( initial_entries, bib )
         for entry in sorted_entries:
             item_dct = {
-                'barcode': entry['barcode'],
+                'barcode': entry['barcode'].replace( ' ', '' ),
                 'callnumber': self.build_callnumber( entry ),
                 'item_id': self.build_item_id( entry['id'] ),
                 'location': entry['location']['name'],
@@ -89,8 +55,6 @@ class BibItemsInfo:
             items.append( item_dct )
         log.debug( f'items, ```{pprint.pformat(items)}```' )
         return items
-
-
 
     def sort_entries( self, initial_entries, bib ):
         """ Gets the 945 order, and sorts entries according to that order.
@@ -101,8 +65,6 @@ class BibItemsInfo:
         sorted_entries = sorted( initial_entries, key=lambda x: order_dct[x['id']] )
         log.debug( f'sorted_entries, ```{pprint.pformat(sorted_entries)}```' )
         return sorted_entries
-
-
 
     def build_callnumber( self, entry ):
         """ Adds data to default callnumber field.
