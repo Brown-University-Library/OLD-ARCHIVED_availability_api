@@ -35,16 +35,16 @@ class SierraConnector( object ):
             log.exception( 'problem getting token...' )
             raise Exception( 'exception getting token' )
 
-    def get_bib_items_info( self, bib ):
+    def get_bib_items_info( self, sliced_bib ):  # bib doesn't contain initial 'b'
         """ Gets json.
-            Called by bib_v2.BibInfo.prep_data() """
-        sliced_bib = bib[1:]
+            Called by bib_items_v2.BibInfo.prep_data() """
         url = f'{settings_app.SIERRA_API_ROOT_URL}/items'
         custom_headers = {'Authorization': f'Bearer {self.token}' }
         payload = {
             'bibIds': f'{sliced_bib}',
-            'fields': 'default,varFields,fixedFields'
-            }
+            'fields': 'default,varFields,fixedFields',
+            'deleted': 'false',
+            'suppressed': 'false' }
         try:
             r = requests.get( url, headers=custom_headers, params=payload, timeout=30 )
             log.debug( f'r.status_code, `{r.status_code}`; ```{r.url}```; r.content, ```{r.content}```' )
