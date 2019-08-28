@@ -50,7 +50,8 @@ class BibItemsInfo:
                 'callnumber': self.build_callnumber( entry ),
                 'item_id': self.build_item_id( entry['id'] ),
                 'location': entry['location']['name'],
-                'status': entry['status']['display']
+                # 'status': entry['status']['display']
+                'status': self.build_status( entry['status'] )
             }
             items.append( item_dct )
         log.debug( f'items, ```{pprint.pformat(items)}```' )
@@ -113,6 +114,16 @@ class BibItemsInfo:
             check_digit = 'x'
         log.debug( f'check_digit, `{check_digit}`' )
         return check_digit
+
+    def build_status( self, status_dct ):
+        """ Examines dct & returns display status.
+            Called by summarize_data() """
+        if 'duedate' in status_dct.keys():
+            status = f'DUE {status_dct["duedate"][0:10]}'  # from "2019-09-30T08:00:00Z" to '2019-09-30'
+        else:
+            status = status_dct['display']
+        log.debug( 'status, `{status}`' )
+        return status
 
     def build_response_dct( self, data_dct, start_stamp ):
         """ Yup.
