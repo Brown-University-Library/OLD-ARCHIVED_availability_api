@@ -66,6 +66,19 @@ class BibItemsInfo:
         log.debug( f'sorted_entries, ```{pprint.pformat(sorted_entries)}```' )
         return sorted_entries
 
+    # def build_callnumber( self, entry ):
+    #     """ Adds data to default callnumber field.
+    #         Called by summarize_data() """
+    #     initial_callnumber = entry['callNumber']
+    #     addition = ''
+    #     if 'varFields' in entry.keys():
+    #         for var_field_dct in entry['varFields']:
+    #             if var_field_dct.get( 'fieldTag', '' ) == 'v':
+    #                 addition = var_field_dct['content']  # i.e. "Box 10"
+    #     built_callnumber = f'{initial_callnumber} {addition}'.strip()
+    #     log.debug( f'built_callnumber, `{built_callnumber}`' )
+    #     return built_callnumber
+
     def build_callnumber( self, entry ):
         """ Adds data to default callnumber field.
             Called by summarize_data() """
@@ -74,8 +87,15 @@ class BibItemsInfo:
         if 'varFields' in entry.keys():
             for var_field_dct in entry['varFields']:
                 if var_field_dct.get( 'fieldTag', '' ) == 'v':
-                    addition = var_field_dct['content']  # i.e. "Box 10"
+                    addition = var_field_dct['content']  # ie "Box 10"
         built_callnumber = f'{initial_callnumber} {addition}'.strip()
+        addition2 = ''
+        if 'fixedFields' in entry.keys():
+            for ( key, value_dct ) in entry['fixedFields'].items():
+                if key == '58':  # eg "label": "COPY #"
+                    if int( value_dct['value'] ) > 1:
+                        addition2 = f'c.{value_dct["value"]}'   # resulting in, eg, c.2
+        built_callnumber = f'{built_callnumber} {addition2}'.strip()
         log.debug( f'built_callnumber, `{built_callnumber}`' )
         return built_callnumber
 
