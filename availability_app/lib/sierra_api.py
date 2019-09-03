@@ -43,8 +43,7 @@ class SierraConnector( object ):
         payload = {
             'bibIds': f'{sliced_bib}',
             'fields': 'default,varFields,fixedFields',
-            'deleted': 'false',
-            'suppressed': 'false' }
+            'deleted': 'false', 'suppressed': 'false', 'limit': '300' }
         try:
             r = requests.get( url, headers=custom_headers, params=payload, timeout=30 )
             log.debug( f'r.status_code, `{r.status_code}`; ```{r.url}```; r.content, ```{r.content}```' )
