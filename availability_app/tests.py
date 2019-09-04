@@ -2,6 +2,7 @@
 
 import datetime, json, logging, pprint
 from availability_app import settings_app
+from availability_app.lib.bib_items_v2 import BibItemsInfo
 from availability_app.lib.ezb_v1_handler import EzbV1Helper, Validator
 from availability_app.lib.log_parser import LogParser
 from django.conf import settings as project_settings
@@ -10,6 +11,125 @@ from django.test import TestCase
 
 log = logging.getLogger(__name__)
 TestCase.maxDiff = None
+
+
+class BibItemsTest( TestCase ):
+    """ Checks module which prepares bib-items for api response. """
+
+    def setUp(self):
+        self.bib_info = BibItemsInfo()
+
+    def test_no_callnumber(self):
+        entry = {'barcode': 'JH 153S ',
+         'bibIds': ['3100638'],
+         'createdDate': '2012-07-18T13:17:00Z',
+         'deleted': False,
+         'fixedFields': {'108': {'label': 'OPACMSG', 'value': ' '},
+                         '109': {'label': 'Circ 7/2015+', 'value': '1'},
+                         '110': {'label': 'Circ 7/2013-6/2015', 'value': '0'},
+                         '127': {'label': 'AGENCY', 'value': '0'},
+                         '161': {'label': 'VI CENTRAL', 'value': '0'},
+                         '162': {'label': 'IR DIST LEARN SAME SITE', 'value': '0'},
+                         '264': {'label': 'Holdings Item Tag', 'value': '6'},
+                         '265': {'label': 'Inherit Location', 'value': 'false'},
+                         '57': {'label': 'BIB HOLD', 'value': 'false'},
+                         '58': {'label': 'COPY #', 'value': '1'},
+                         '59': {'label': 'ICODE1', 'value': '0'},
+                         '60': {'label': 'ICODE2', 'value': '-'},
+                         '61': {'display': 'Hay Annex',
+                                'label': 'I TYPE',
+                                'value': '99'},
+                         '62': {'label': 'PRICE', 'value': '0.000000'},
+                         '64': {'label': 'OUT LOC', 'value': '300'},
+                         '67': {'label': 'LPATRON', 'value': '1117435'},
+                         '68': {'label': 'LCHKIN', 'value': '2019-02-27T20:13:09Z'},
+                         '70': {'label': 'IN LOC', 'value': '300'},
+                         '74': {'label': 'IUSE3', 'value': '0'},
+                         '76': {'label': 'Total Circ 1995+', 'value': '1'},
+                         '77': {'label': 'TOT RENEW', 'value': '0'},
+                         '78': {'label': 'LOUTDATE', 'value': '2019-02-27T20:12:59Z'},
+                         '79': {'display': 'ANNEX HAY',
+                                'label': 'LOCATION',
+                                'value': 'qhs'},
+                         '80': {'label': 'REC TYPE', 'value': 'i'},
+                         '81': {'label': 'RECORD #', 'value': '16565480'},
+                         '83': {'label': 'CREATED', 'value': '2012-07-18T13:17:00Z'},
+                         '84': {'label': 'UPDATED', 'value': '2019-03-01T16:42:03Z'},
+                         '85': {'label': 'REVISIONS', 'value': '17'},
+                         '86': {'label': 'AGENCY', 'value': '1'},
+                         '88': {'display': 'AVAILABLE',
+                                'label': 'STATUS',
+                                'value': '-'},
+                         '93': {'label': 'INTL USE ', 'value': '0'},
+                         '94': {'label': 'COPY USE', 'value': '0'},
+                         '97': {'label': 'IMESSAGE', 'value': ' '},
+                         '98': {'label': 'PDATE', 'value': '2019-02-27T20:13:09Z'}},
+         'id': '16565480',
+         'location': {'code': 'qhs', 'name': 'ANNEX HAY'},
+         'status': {'code': '-', 'display': 'AVAILABLE'},
+         'updatedDate': '2019-03-01T16:42:03Z',
+         'varFields': [{'content': 'JH 153S ', 'fieldTag': 'b'},
+                       {'content': 'Pleasure Readers (Greenleaf Classics)',
+                        'fieldTag': 'p'},
+                       {'content': 'Box 25', 'fieldTag': 'v'}]
+        }
+        self.assertEqual( 'no_callnumber_found', self.bib_info.build_callnumber(entry) )
+
+        ## end def test_no_callnumber()
+
+    def test_normal_callnumber(self):
+        entry = {
+         'barcode': '3 1236 07396 3426',
+         'bibIds': ['5479552'],
+         'callNumber': 'Ms.2010.043',
+         'createdDate': '2011-04-19T20:58:33Z',
+         'deleted': False,
+         'fixedFields': {'108': {'label': 'OPACMSG', 'value': ' '},
+              '109': {'label': 'Circ 7/2015+', 'value': '0'},
+              '110': {'label': 'Circ 7/2013-6/2015', 'value': '0'},
+              '127': {'label': 'AGENCY', 'value': '0'},
+              '161': {'label': 'VI CENTRAL', 'value': '0'},
+              '162': {'label': 'IR DIST LEARN SAME SITE', 'value': '0'},
+              '264': {'label': 'Holdings Item Tag', 'value': '6'},
+              '265': {'label': 'Inherit Location', 'value': 'false'},
+              '57': {'label': 'BIB HOLD', 'value': 'false'},
+              '58': {'label': 'COPY #', 'value': '1'},
+              '59': {'label': 'ICODE1', 'value': '0'},
+              '60': {'label': 'ICODE2', 'value': '-'},
+              '61': {'display': 'Manuscript', 'label': 'I TYPE', 'value': '101'},
+              '62': {'label': 'PRICE', 'value': '0.000000'},
+              '64': {'label': 'OUT LOC', 'value': '0'},
+              '70': {'label': 'IN LOC', 'value': '0'},
+              '74': {'label': 'IUSE3', 'value': '0'},
+              '76': {'label': 'Total Circ 1995+', 'value': '0'},
+              '77': {'label': 'TOT RENEW', 'value': '0'},
+              '79': {'display': 'ANNEX HAY', 'label': 'LOCATION', 'value': 'qhs'},
+              '80': {'label': 'REC TYPE', 'value': 'i'},
+              '81': {'label': 'RECORD #', 'value': '15990360'},
+              '83': {'label': 'CREATED', 'value': '2011-04-19T20:58:33Z'},
+              '84': {'label': 'UPDATED', 'value': '2019-07-31T13:00:24Z'},
+              '85': {'label': 'REVISIONS', 'value': '5'},
+              '86': {'label': 'AGENCY', 'value': '1'},
+              '88': {'display': 'AVAILABLE', 'label': 'STATUS', 'value': '-'},
+              '93': {'label': 'INTL USE ', 'value': '0'},
+              '94': {'label': 'COPY USE', 'value': '0'},
+              '97': {'label': 'IMESSAGE', 'value': ' '},
+              '98': {'label': 'PDATE', 'value': '2014-09-04T21:04:00Z'}},
+         'id': '15990360',
+         'location': {'code': 'qhs', 'name': 'ANNEX HAY'},
+         'status': {'code': '-', 'display': 'AVAILABLE'},
+         'updatedDate': '2019-07-31T13:00:24Z',
+         'varFields': [{'content': '3 1236 07396 3426', 'fieldTag': 'b'},
+              {'content': 'Transferred from Hay Manuscripts to Annex Hay, AEG 4/22/2011',
+               'fieldTag': 'n'},
+              {'content': 'accessioned at Annex Hay 5/4/2011', 'fieldTag': 'n'},
+              {'content': 'Box 2', 'fieldTag': 'v'}]
+        }
+        self.assertEqual( 'Ms.2010.043 Box 2', self.bib_info.build_callnumber(entry) )
+
+        ## end def test_normal_callnumber()
+
+    ## end class BibItemsTest
 
 
 class EzbV1HelperTest( TestCase ):
