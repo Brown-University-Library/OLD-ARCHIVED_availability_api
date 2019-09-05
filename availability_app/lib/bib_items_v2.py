@@ -28,16 +28,6 @@ class BibItemsInfo:
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    # def prep_data( self, bib ):
-    #     """ Grabs and processes data from Sierra.
-    #         Called by: views.v2_bib() """
-    #     sierra = SierraConnector()  # instantiated here to get fresh token
-    #     raw_data = sierra.get_bib_items_info( bib[1:] )  # removes the 'b' of the bib-number
-    #     items = self.summarize_data( raw_data, bib )
-    #     response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_data, 'sierra_api_query': sierra.url }
-    #     log.debug( f'response_dct, ```{response_dct}```' )
-    #     return response_dct
-
     def prep_data( self, bibnum ):
         """ Grabs and processes data from Sierra.
             Called by: views.v2_bib() """
