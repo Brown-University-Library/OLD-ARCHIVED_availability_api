@@ -43,12 +43,14 @@ class BibItemsInfo:
             Called by: views.v2_bib() """
         sierra = SierraConnector()  # instantiated here to get fresh token
         raw_items_data = sierra.get_bib_items_info( bibnum[1:] )  # removes the 'b' of the bib-number
-        items = self.summarize_data( raw_items_data, bibnum )
-        response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
+        items = self.summarize_item_data( raw_items_data, bibnum )
+        raw_bib_data = sierra.get_bib_info( bibnum[1:] )
+        bib_dct = self.summarize_bib_data( raw_bib_data )
+        response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
-    def summarize_data( self, raw_items_data, bib ):
+    def summarize_item_data( self, raw_items_data, bib ):
         """ Extracts essential data from sierra-api data.
             Called by prep_data() """
         items = []
@@ -69,7 +71,7 @@ class BibItemsInfo:
 
     def sort_entries( self, initial_entries, bib ):
         """ Gets the 945 order, and sorts entries according to that order.
-            Called by summarize_data() """
+            Called by summarize_item_data() """
         ordered_945_item_ids = self.get_945_item_id_list( bib )
         order_dct = { order_945: index for index, order_945 in enumerate(ordered_945_item_ids) }
         log.debug( f'order_dct, ```{pprint.pformat(order_dct)}```' )
@@ -79,7 +81,7 @@ class BibItemsInfo:
 
     def build_callnumber( self, entry ):
         """ Adds data to default callnumber field.
-            Called by summarize_data() """
+            Called by summarize_item_data() """
         if 'callNumber' not in entry.keys():
             built_callnumber = 'no_callnumber_found'
         else:
@@ -111,7 +113,7 @@ class BibItemsInfo:
 
     def build_item_id( self, initial_item_id ):
         """ Adds '.i' and check-digit to item-id.
-            Called by summarize_data() """
+            Called by summarize_item_data() """
         check_digit = self.build_check_digit( initial_item_id )
         built_item_id = f'i{initial_item_id}{check_digit}'
         log.debug( 'built_item_id, `{built_item_id}`' )
@@ -139,7 +141,7 @@ class BibItemsInfo:
 
     def build_status( self, status_dct ):
         """ Examines dct & returns display status.
-            Called by summarize_data() """
+            Called by summarize_item_data() """
         if 'duedate' in status_dct.keys():
             status = f'DUE {status_dct["duedate"][0:10]}'  # from "2019-09-30T08:00:00Z" to '2019-09-30'
         else:
