@@ -305,7 +305,7 @@ class ClientBibItemsTest( TestCase ):
         response = self.client.get( '/v2/bib_items/b5479552/' )  # Diane Middlebrook papers
         content = response.content.decode('utf-8')
         rspns_dct = json.loads( content )
-        self.assertEqual( 'the-title', rspns_dct['response']['bib']['title'] )
-        self.assertEqual( 'the-author', rspns_dct['response']['bib']['author'] )
+        self.assertEqual( 'Diane Middlebrook papers', rspns_dct['response']['bib']['title'] )
+        self.assertEqual( 'Middlebrook, Diane Wood, 1939-2007', rspns_dct['response']['bib']['author'] )
 
     ## end class ClientBibItemsTest()

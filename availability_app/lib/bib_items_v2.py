@@ -50,8 +50,23 @@ class BibItemsInfo:
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
+    def summarize_bib_data( self, raw_bib_data ):
+        """ Extracts essential data from sierra-api bib data.
+            Called by prep_data() """
+        try:
+            entry = raw_bib_data['entries'][0]
+            title = entry['title']
+            if title[-1] == ',':
+                title = title[0:-1]
+            bib_dct = { 'title': title, 'author': entry['author'], 'url': f'https://search.library.brown.edu/catalog/b{entry["id"]}' }
+        except:
+            log.exception( 'problem building bib_dct; traceback follows but processing will continue' )
+            bib_dct = { 'title': 'title unavailable', 'author': 'author unavailable', 'url': 'url unavailable' }
+        log.debug( f'bib_dct, ```{bib_dct}```' )
+        return bib_dct
+
     def summarize_item_data( self, raw_items_data, bib ):
-        """ Extracts essential data from sierra-api data.
+        """ Extracts essential data from sierra-api items data.
             Called by prep_data() """
         items = []
         initial_entries = raw_items_data['entries']  # initial_entries is a list of dicts
