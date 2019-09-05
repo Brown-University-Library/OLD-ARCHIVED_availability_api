@@ -295,3 +295,17 @@ class V1_UrlTest( TestCase ):
     #     self.assertEqual( 'query_key bad', response_dct['response']['error'] )
 
     ## end class V1_UrlTest()
+
+
+class ClientBibItemsTest( TestCase ):
+    """ Checks isbn urls. """
+
+    def test_response_bib(self):
+        """ Checks for expected keys in response'. """
+        response = self.client.get( '/v2/bib_items/b5479552/' )  # Diane Middlebrook papers
+        content = response.content.decode('utf-8')
+        rspns_dct = json.loads( content )
+        self.assertEqual( 'the-title', rspns_dct['response']['bib']['title'] )
+        self.assertEqual( 'the-author', rspns_dct['response']['bib']['author'] )
+
+    ## end class ClientBibItemsTest()
