@@ -57,7 +57,7 @@ class SierraConnector( object ):
     def get_bib_info( self, sliced_bib ):
         """ Gets json for bib.
             Called by bib_items_v2.BibInfo.prep_data() """
-        url = f'{settings_app.SIERRA_API_ROOT_URL}/bibs/?id=5479552'
+        url = f'{settings_app.SIERRA_API_ROOT_URL}/bibs/?id={sliced_bib}'
         custom_headers = {'Authorization': f'Bearer {self.token}' }
         try:
             r = requests.get( url, headers=custom_headers, timeout=30 )
