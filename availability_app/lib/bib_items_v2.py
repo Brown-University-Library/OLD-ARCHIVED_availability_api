@@ -28,21 +28,31 @@ class BibItemsInfo:
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    def prep_data( self, bib ):
+    # def prep_data( self, bib ):
+    #     """ Grabs and processes data from Sierra.
+    #         Called by: views.v2_bib() """
+    #     sierra = SierraConnector()  # instantiated here to get fresh token
+    #     raw_data = sierra.get_bib_items_info( bib[1:] )  # removes the 'b' of the bib-number
+    #     items = self.summarize_data( raw_data, bib )
+    #     response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_data, 'sierra_api_query': sierra.url }
+    #     log.debug( f'response_dct, ```{response_dct}```' )
+    #     return response_dct
+
+    def prep_data( self, bibnum ):
         """ Grabs and processes data from Sierra.
             Called by: views.v2_bib() """
         sierra = SierraConnector()  # instantiated here to get fresh token
-        raw_data = sierra.get_bib_items_info( bib[1:] )  # removes the 'b' of the bib-number
-        items = self.summarize_data( raw_data, bib )
-        response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_data, 'sierra_api_query': sierra.url }
+        raw_items_data = sierra.get_bib_items_info( bibnum[1:] )  # removes the 'b' of the bib-number
+        items = self.summarize_data( raw_items_data, bibnum )
+        response_dct = { 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
-    def summarize_data( self, raw_data, bib ):
+    def summarize_data( self, raw_items_data, bib ):
         """ Extracts essential data from sierra-api data.
             Called by prep_data() """
         items = []
-        initial_entries = raw_data['entries']  # initial_entries is a list of dicts
+        initial_entries = raw_items_data['entries']  # initial_entries is a list of dicts
         sorted_entries = self.sort_entries( initial_entries, bib )
         for entry in sorted_entries:
             item_dct = {
