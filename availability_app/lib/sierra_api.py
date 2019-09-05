@@ -36,7 +36,7 @@ class SierraConnector( object ):
             raise Exception( 'exception getting token' )
 
     def get_bib_items_info( self, sliced_bib ):  # bib doesn't contain initial 'b'
-        """ Gets json.
+        """ Gets json for items.
             Called by bib_items_v2.BibInfo.prep_data() """
         url = f'{settings_app.SIERRA_API_ROOT_URL}/items'
         custom_headers = {'Authorization': f'Bearer {self.token}' }
@@ -50,7 +50,22 @@ class SierraConnector( object ):
             self.url = r.url
             return r.json()
         except:
-            log.exception( 'problem hitting api; traceback follows' )
+            log.exception( 'problem hitting api for items; traceback follows' )
+            self.send_admin_email()
+            return {}
+
+    def get_bib_info( self, sliced_bib ):
+        """ Gets json for bib.
+            Called by bib_items_v2.BibInfo.prep_data() """
+        url = f'{settings_app.SIERRA_API_ROOT_URL}/bibs/?id=5479552'
+        custom_headers = {'Authorization': f'Bearer {self.token}' }
+        try:
+            r = requests.get( url, headers=custom_headers, timeout=30 )
+            log.debug( f'r.status_code, `{r.status_code}`; ```{r.url}```; r.content, ```{r.content}```' )
+            self.url = r.url
+            return r.json()
+        except:
+            log.exception( 'problem hitting api for bib; traceback follows' )
             self.send_admin_email()
             return {}
 
