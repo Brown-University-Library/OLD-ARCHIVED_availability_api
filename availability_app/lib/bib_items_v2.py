@@ -36,7 +36,8 @@ class BibItemsInfo:
         items = self.summarize_item_data( raw_items_data, bibnum )
         raw_bib_data = sierra.get_bib_info( bibnum[1:] )
         bib_dct = self.summarize_bib_data( raw_bib_data )
-        response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
+        # response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
+        response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items) }
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
