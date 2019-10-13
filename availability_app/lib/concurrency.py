@@ -26,7 +26,7 @@ class AsyncHelper():
         async with trio.open_nursery() as nursery:
             for item in url_dct.items():
                 nursery.start_soon( self.fetch, item, results_holder_dct )
-        print( 'Total time: %s' % str(time.time() - start_time) )
+        log.debug( 'total time: %s' % str(time.time() - start_time) )
 
     async def fetch( self, item, results_holder_dct ):
         """ Handles work of hitting the urls.
