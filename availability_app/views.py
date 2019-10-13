@@ -27,9 +27,9 @@ def concurrency_test( request ):
     from availability_app.lib.concurrency import AsyncHelper
     async_hlpr = AsyncHelper()
     url_dct = {
-        'short': 'https://httpbin.org/delay/.9',
+        'short': 'https://httpbin.org/delay/.5',
         'medium': 'https://httpbin.org/delay/1',
-        'long': 'https://httpbin.org/delay/1.1' }
+        'long': 'https://httpbin.org/delay/1.5' }
     result_dct = async_hlpr.process_urls( url_dct )
     output = json.dumps( result_dct, sort_keys=True, indent=2 )
     return HttpResponse( output, content_type='application/json; charset=utf-8' )

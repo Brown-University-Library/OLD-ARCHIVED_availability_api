@@ -22,19 +22,20 @@ class AsyncHelper():
             Called by process_urls() """
         log.debug( 'starting manage_calls()' )
         start_time = time.time()
+        results_holder_dct = {}
         async with trio.open_nursery() as nursery:
             for item in url_dct.items():
-                nursery.start_soon( self.fetch, item )
+                nursery.start_soon( self.fetch, item, results_holder_dct )
         print( 'Total time: %s' % str(time.time() - start_time) )
 
-    async def fetch( self, item ):
+    async def fetch( self, item, results_holder_dct ):
         """ Handles work of hitting the urls.
             Called by manage_calls() """
         log.debug( f'starting fetch() with item, ```{item}```' )
         ( label, url ) = ( item[0], item[1] )
-        print( f'Start: url, ```{url}```' )
+        log.debug( f'start: url, ```{url}```' )
         response = await asks.get( url )
         # print("Finished: ", url, len(response.content))
-        print( 'Finished: url, ```%s```; status_code, `%s`' % (url, response.status_code) )
+        log.debug( 'finished: url, ```%s```; status_code, `%s`' % (url, response.status_code) )
 
     ## end class AsyncHelper()
