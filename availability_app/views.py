@@ -22,6 +22,25 @@ stats_validator = StatsValidator()
 bib_items = BibItemsInfo()
 
 
+# def concurrency_test( request ):
+#     """ Tests concurrency, via trio, with django. """
+#     from availability_app.lib.concurrency import AsyncHelper
+#     if project_settings.DEBUG == False:  # only active on dev-server
+#         return HttpResponseNotFound( '<div>404 / Not Found</div>' )
+#     async_hlpr = AsyncHelper()
+#     url_dct = {
+#         'shortest': 'https://httpbin.org/delay/.6',
+#         'shorter': 'https://httpbin.org/delay/.8',
+#         'standard': 'https://httpbin.org/delay/1',
+#         'longer': 'https://httpbin.org/delay/1.2',
+#         'longest': 'https://httpbin.org/delay/1.4' }
+#     async_hlpr.process_urls( url_dct )
+#     response_dct = {
+#         'results:': async_hlpr.results_dct, 'total_time_taken': async_hlpr.total_time_taken }
+#     output = json.dumps( response_dct, sort_keys=True, indent=2 )
+#     return HttpResponse( output, content_type='application/json; charset=utf-8' )
+
+
 def concurrency_test( request ):
     """ Tests concurrency, via trio, with django. """
     from availability_app.lib.concurrency import AsyncHelper
@@ -34,9 +53,10 @@ def concurrency_test( request ):
         'standard': 'https://httpbin.org/delay/1',
         'longer': 'https://httpbin.org/delay/1.2',
         'longest': 'https://httpbin.org/delay/1.4' }
+    if request.GET.get( 'outlier', '' ) == 'yes':
+        url_dct['outlier'] = 'https://httpbin.org/delay/10'
     async_hlpr.process_urls( url_dct )
-    response_dct = {
-        'results:': async_hlpr.results_dct, 'total_time_taken': async_hlpr.total_time_taken }
+    response_dct = { 'results:': async_hlpr.results_dct, 'total_time_taken': async_hlpr.total_time_taken }
     output = json.dumps( response_dct, sort_keys=True, indent=2 )
     return HttpResponse( output, content_type='application/json; charset=utf-8' )
 
