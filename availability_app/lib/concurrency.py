@@ -14,11 +14,13 @@ class AsyncHelper():
         """ Initiates async manager.
             Called by views.concurrency_test()
             (Bridge between sync and async.) """
+        log.debug( 'about to call trio.run()' )
         trio.run( self.manage_calls, url_dct )
 
     async def manage_calls( self, url_dct ):
         """ Hits urls concurrently.
             Called by process_urls() """
+        log.debug( 'starting manage_calls()' )
         start_time = time.time()
         async with trio.open_nursery() as nursery:
             for item in url_dct.items():
@@ -26,6 +28,9 @@ class AsyncHelper():
         print( 'Total time: %s' % str(time.time() - start_time) )
 
     async def fetch( self, item ):
+        """ Handles work of hitting the urls.
+            Called by manage_calls() """
+        log.debug( f'starting fetch() with item, ```{item}```' )
         ( label, url ) = ( item[0], item[1] )
         print( f'Start: url, ```{url}```' )
         response = await asks.get( url )
