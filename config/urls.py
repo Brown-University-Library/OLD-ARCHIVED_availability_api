@@ -10,6 +10,8 @@ admin.autodiscover()
 
 urlpatterns = [
 
+    url( r'^async/$',  avl_views.concurrency_test, name='async_url' ),
+
     url( r'^admin/', include(admin.site.urls) ),
 
     url( r'^info/$',  avl_views.info, name='info_url' ),

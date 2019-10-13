@@ -22,6 +22,19 @@ stats_validator = StatsValidator()
 bib_items = BibItemsInfo()
 
 
+def concurrency_test( request ):
+    """ Tests concurrency, via trio, with django. """
+    from availability_app.lib.concurrency import AsyncHelper
+    async_hlpr = AsyncHelper()
+    url_dct = {
+        'short': 'https://httpbin.org/delay/.9',
+        'medium': 'https://httpbin.org/delay/1',
+        'long': 'https://httpbin.org/delay/1.1' }
+    result_dct = async_hlpr.process_urls( url_dct )
+    output = json.dumps( result_dct, sort_keys=True, indent=2 )
+    return HttpResponse( output, content_type='application/json; charset=utf-8' )
+
+
 def info( request ):
     """ Returns basic data including branch & commit. """
     # log.debug( 'request.__dict__, ```%s```' % pprint.pformat(request.__dict__) )
