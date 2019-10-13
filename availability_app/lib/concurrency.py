@@ -9,6 +9,7 @@ class AsyncHelper():
 
     def __init__(self):
         self.results_dct = {}
+        self.total_time_taken = None
 
     def process_urls( self, url_dct ):
         """ Initiates async manager.
@@ -27,7 +28,8 @@ class AsyncHelper():
             for item in url_dct.items():
                 nursery.start_soon( self.fetch, item, results_holder_dct )
         log.debug( f'results_holder_dct, ```{pprint.pformat(results_holder_dct)}```' )
-        log.debug( 'total time: %s' % str(time.time() - start_time) )
+        self.total_time_taken = str( time.time() - start_time )
+        log.debug( f'total time: taken ```{self.total_time_taken}```' )
         self.results_dct = results_holder_dct
         return
 
@@ -35,10 +37,12 @@ class AsyncHelper():
         """ Handles work of hitting the urls.
             Called by manage_calls() """
         log.debug( f'starting fetch() with item, ```{item}```' )
+        fetch_start_time = time.time()
         ( label, url ) = ( item[0], item[1] )
         log.debug( f'start: url, ```{url}```' )
         response = await asks.get( url )
-        holder_result_dct = { 'url': url, 'response_status_code': response.status_code }
+        fetch_time_taken = str( time.time() - fetch_start_time )
+        holder_result_dct = { 'url': url, 'response_status_code': response.status_code, 'time_taken': fetch_time_taken }
         log.debug( 'finished: holder_result_dct, ```{holder_result_dct}```' )
         results_holder_dct[label] = holder_result_dct
         return
