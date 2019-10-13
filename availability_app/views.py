@@ -32,8 +32,9 @@ def concurrency_test( request ):
         'standard': 'https://httpbin.org/delay/1',
         'longer': 'https://httpbin.org/delay/1.2',
         'longest': 'https://httpbin.org/delay/1.4' }
-    result_dct = async_hlpr.process_urls( url_dct )
-    output = json.dumps( result_dct, sort_keys=True, indent=2 )
+    async_hlpr.process_urls( url_dct )
+    results_dct = async_hlpr.results_dct
+    output = json.dumps( results_dct, sort_keys=True, indent=2 )
     return HttpResponse( output, content_type='application/json; charset=utf-8' )
 
 
