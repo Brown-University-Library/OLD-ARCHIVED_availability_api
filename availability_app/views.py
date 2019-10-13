@@ -10,7 +10,7 @@ from availability_app.lib.stats_v1_handler import StatsValidator, StatsBuilder
 from django.conf import settings as project_settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 
 
@@ -25,6 +25,8 @@ bib_items = BibItemsInfo()
 def concurrency_test( request ):
     """ Tests concurrency, via trio, with django. """
     from availability_app.lib.concurrency import AsyncHelper
+    if project_settings.DEBUG == False:  # only active on dev-server
+        return HttpResponseNotFound( '<div>404 / Not Found</div>' )
     async_hlpr = AsyncHelper()
     url_dct = {
         'shortest': 'https://httpbin.org/delay/.6',

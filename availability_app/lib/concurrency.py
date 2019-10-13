@@ -19,11 +19,11 @@ class AsyncHelper():
         trio.run( self.manage_calls, url_dct )
 
     async def manage_calls( self, url_dct ):
-        """ Hits urls concurrently.
+        """ Triggers hitting urls concurrently.
             Called by process_urls() """
         log.debug( 'starting manage_calls()' )
         start_time = time.time()
-        results_holder_dct = {}
+        results_holder_dct = {}  # receives fetch() responses as they're produced
         async with trio.open_nursery() as nursery:
             for item in url_dct.items():
                 nursery.start_soon( self.fetch, item, results_holder_dct )
