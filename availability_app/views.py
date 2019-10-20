@@ -42,20 +42,6 @@ def concurrency_test( request ):
     return HttpResponse( output, content_type='application/json; charset=utf-8' )
 
 
-def info( request ):
-    """ Returns basic data including branch & commit. """
-    # log.debug( 'request.__dict__, ```%s```' % pprint.pformat(request.__dict__) )
-    rq_now = datetime.datetime.now()
-    commit = view_info_helper.get_commit()
-    branch = view_info_helper.get_branch()
-    info_txt = commit.replace( 'commit', branch )
-    resp_now = datetime.datetime.now()
-    taken = resp_now - rq_now
-    context_dct = view_info_helper.make_context( request, rq_now, info_txt, taken )
-    output = json.dumps( context_dct, sort_keys=True, indent=2 )
-    return HttpResponse( output, content_type='application/json; charset=utf-8' )
-
-
 def ezb_v1( request, id_type, id_value ):
     """ Handles existing easyborrow-api call. """
     params = request.GET
@@ -110,3 +96,30 @@ def locations_and_statuses( request ):
     }
     output = json.dumps( data_dct, sort_keys=True, indent=2 )
     return HttpResponse( output, content_type='application/json; charset=utf-8' )
+
+
+# ===========================
+# for development convenience
+# ===========================
+
+
+def version( request ):
+    """ Returns basic data including branch & commit. """
+    # log.debug( 'request.__dict__, ```%s```' % pprint.pformat(request.__dict__) )
+    rq_now = datetime.datetime.now()
+    commit = view_info_helper.get_commit()
+    branch = view_info_helper.get_branch()
+    info_txt = commit.replace( 'commit', branch )
+    resp_now = datetime.datetime.now()
+    taken = resp_now - rq_now
+    context_dct = view_info_helper.make_context( request, rq_now, info_txt, taken )
+    output = json.dumps( context_dct, sort_keys=True, indent=2 )
+    return HttpResponse( output, content_type='application/json; charset=utf-8' )
+
+
+def error_check( request ):
+    """ For checking that admins receive error-emails. """
+    if project_settings.DEBUG == True:
+        1/0
+    else:
+        return HttpResponseNotFound( '<div>404 / Not Found</div>' )
