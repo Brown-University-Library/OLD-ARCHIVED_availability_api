@@ -6,6 +6,7 @@ import datetime, json, logging, operator, os, pprint
 
 import requests
 from availability_app.lib.sierra_api import SierraConnector
+from django.conf import settings as project_settings
 
 
 log = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ class BibItemsInfo:
         log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
         return query_dct
 
-    def prep_data( self, bibnum ):
+    def prep_data( self, bibnum, host ):
         """ Grabs and processes data from Sierra.
             Called by: views.v2_bib() """
         sierra = SierraConnector()  # instantiated here to get fresh token
@@ -38,6 +39,9 @@ class BibItemsInfo:
         bib_dct = self.summarize_bib_data( raw_bib_data )
         # response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
         response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items) }
+        if project_settings.DEBUG == True and host[0:9] == '127.0.0.1':  # useful for development
+            response_dct['sierra-api'] = raw_items_data
+            response_dct['sierra_api_query'] = sierra.url
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 

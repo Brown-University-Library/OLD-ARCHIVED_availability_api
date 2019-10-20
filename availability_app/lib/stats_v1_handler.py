@@ -39,7 +39,7 @@ class StatsBuilder( object ):
 
     def build_response( self, results, get_params, scheme, host, rq_now ):
         """ Massages data into response.
-            Called by ezb_v1_stats() """
+            Called by views.ezb_v1_stats() """
         if results:
             first_record_date = results.first().count_date
             last_record_date = results.last().count_date

@@ -22,25 +22,6 @@ stats_validator = StatsValidator()
 bib_items = BibItemsInfo()
 
 
-# def concurrency_test( request ):
-#     """ Tests concurrency, via trio, with django. """
-#     from availability_app.lib.concurrency import AsyncHelper
-#     if project_settings.DEBUG == False:  # only active on dev-server
-#         return HttpResponseNotFound( '<div>404 / Not Found</div>' )
-#     async_hlpr = AsyncHelper()
-#     url_dct = {
-#         'shortest': 'https://httpbin.org/delay/.6',
-#         'shorter': 'https://httpbin.org/delay/.8',
-#         'standard': 'https://httpbin.org/delay/1',
-#         'longer': 'https://httpbin.org/delay/1.2',
-#         'longest': 'https://httpbin.org/delay/1.4' }
-#     async_hlpr.process_urls( url_dct )
-#     response_dct = {
-#         'results:': async_hlpr.results_dct, 'total_time_taken': async_hlpr.total_time_taken }
-#     output = json.dumps( response_dct, sort_keys=True, indent=2 )
-#     return HttpResponse( output, content_type='application/json; charset=utf-8' )
-
-
 def concurrency_test( request ):
     """ Tests concurrency, via trio, with django. """
     from availability_app.lib.concurrency import AsyncHelper
@@ -105,17 +86,13 @@ def ezb_v1_stats( request ):
     return HttpResponse( stats_builder.output, content_type=u'application/javascript; charset=utf-8' )
 
 
-# def ezb_v2( request, id_type, id_value ):
-#     """ Handles upcoming easyborrow-api call. """
-#     return HttpResponse( 'ezb_v2_url handling coming' )
-
-
 def v2_bib_items( request, bib_value ):
     """ Handles upcoming easyborrow-api call. """
     log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
     start_stamp = datetime.datetime.now()
     query_dct = bib_items.build_query_dct( request, start_stamp )
-    data_dct = bib_items.prep_data( bib_value )
+    host = request.META.get( 'HTTP_HOST', '127.0.0.1' )
+    data_dct = bib_items.prep_data( bib_value, host )
     response_dct = bib_items.build_response_dct( data_dct, start_stamp )
     jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
