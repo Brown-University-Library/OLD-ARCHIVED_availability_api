@@ -49,7 +49,7 @@ class AsyncHelper():
         fetch_time_taken = str( time.time() - fetch_start_time )
         # holder_result_dct = { 'url': url, 'response_status_code': response.status_code, 'time_taken': fetch_time_taken }
         holder_result_dct = { 'url': url, 'response_status_code': status_code, 'time_taken': fetch_time_taken }
-        log.debug( 'finished: holder_result_dct, ```{holder_result_dct}```' )
+        log.debug( f'finished: holder_result_dct, ```{holder_result_dct}```' )
         results_holder_dct[label] = holder_result_dct
         return
 
