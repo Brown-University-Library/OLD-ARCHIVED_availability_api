@@ -37,6 +37,7 @@ class AsyncHelper():
         """ Handles work of hitting the urls.
             Called by manage_calls() """
         log.debug( f'starting fetch() with item, ```{item}```' )
+        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         ( label, url ) = ( item[0], item[1] )
         log.debug( f'start: url, ```{url}```' )

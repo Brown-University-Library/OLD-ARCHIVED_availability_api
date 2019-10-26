@@ -74,7 +74,8 @@ def ezb_v1_stats( request ):
 
 def v2_bib_items( request, bib_value ):
     """ Handles upcoming easyborrow-api call. """
-    log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
+    # log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
+    log.debug( f'starting... request.__dict__, ```{request.__dict__}```' )
     start_stamp = datetime.datetime.now()
     query_dct = bib_items.build_query_dct( request, start_stamp )
     host = request.META.get( 'HTTP_HOST', '127.0.0.1' )

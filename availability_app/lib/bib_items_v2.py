@@ -132,17 +132,18 @@ class BibItemsInfo:
     def build_check_digit( self, raw_item_id ):
         """ Calculates check-digit.
             Logic based on: <https://csdirect.iii.com/sierrahelp/Content/sril/sril_records_numbers.html>
+            Reverses the string, then, for each character-position (now from left-to-right), determines a value and adds it to a total, and finally applies a modulo.
             Called by build_item_id() """
+        log.debug( f'raw_item_id, `{raw_item_id}`' )
         data = str(raw_item_id).replace('-', '').replace(' ', '')  # Removes Hyphens and Spaces
         reversed_data = ''.join( reversed(data) )
         total = 0
         for counter,character in enumerate( reversed_data ):
-            log.debug( f'character, `{character}`' )
-            one_index = counter + 1; log.debug( f'one_index, `{one_index}`' )
-            multiplyer = one_index + 1; log.debug( f'multiplyer, `{multiplyer}`' )
-            multiplied = int(character) * multiplyer; log.debug( f'multiplied, `{multiplied}`' )
+            one_index = counter + 1
+            multiplyer = one_index + 1
+            multiplied = int(character) * multiplyer
             total += multiplied
-            log.debug( f'total, `{total}`' )
+            log.debug( f'after character, `{character}` -- total currently, `{total}`' )
         check_digit = (total % 11)
         if check_digit == 10:
             check_digit = 'x'
