@@ -4,7 +4,7 @@ Helper for views.v2_bib()
 
 import datetime, json, logging, operator, os, pprint, time
 
-import requests
+import asks, requests, trio
 from availability_app.lib.sierra_api import SierraConnector
 from django.conf import settings as project_settings
 
@@ -35,16 +35,25 @@ class BibItemsInfoAsync:
 
 
 
-
     def manage_data_calls( self, bibnum ):
+        """ Initiates async manager.
+            Called by views.concurrency_test()
+            (Bridge between sync and async.) """
+        log.debug( 'about to call trio.run()' )
+        trio.run( self.call_urls, bibnum )
+
+
+
+
+    async def call_urls( self, bibnum ):
         """ Triggers hitting urls concurrently.
             Called by views.v2_bib_items_async() """
         log.debug( 'starting manage_data_calls()' )
         start_time = time.time()
         results_holder_dct = {}  # receives fetch() responses as they're produced
-        # async with trio.open_nursery() as nursery:
-        #     nursery.start_soon( self.fetch_sierra_token, results_holder_dct )
-        #     nursery.start_soon( self.fetch_945_data, bibnum, results_holder_dct )
+        async with trio.open_nursery() as nursery:
+            nursery.start_soon( self.fetch_sierra_token, results_holder_dct )
+            # nursery.start_soon( self.fetch_945_data, bibnum, results_holder_dct )
         # async with trio.open_nursery() as nursery:
         #     nursery.start_soon( self.fetch_sierra_bib_data, results_holder_dct )
         #     nursery.start_soon( self.fetch_sierra_item_data, results_holder_dct )
@@ -52,6 +61,25 @@ class BibItemsInfoAsync:
         self.total_time_taken = str( time.time() - start_time )
         log.debug( f'total time: taken ```{self.total_time_taken}```' )
         self.results_dct = results_holder_dct
+        return
+
+
+    async def fetch_sierra_token( self, results_holder_dct ):
+        """ Returns auth-token for later sierra calls.
+            Called by manage_data_calls() """
+        log.debug( 'starting fetch_sierra_token()' )
+        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        fetch_start_time = time.time()
+        try:
+            response = await asks.post( 'https://httpbin.org/delay/.3', timeout=2 )
+            status_code = response.status_code
+        except Exception as e:
+            status_code = repr(e)
+            log.exception( '`get` failed; traceback follows; processing will continue' )
+        fetch_time_taken = str( time.time() - fetch_start_time )
+        holder_result_dct = { 'sierra_token_value': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'finished: holder_result_dct, ```{holder_result_dct}```' )
+        results_holder_dct['sierra_token_data'] = holder_result_dct
         return
 
 
