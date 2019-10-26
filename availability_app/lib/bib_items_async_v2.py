@@ -35,28 +35,28 @@ class BibItemsInfoAsync:
 
 
 
+
     def manage_data_calls( self, bibnum ):
         """ Initiates async manager.
-            Called by views.concurrency_test()
+            Called by views.v2_bib_items_async()
             (Bridge between sync and async.) """
         log.debug( 'about to call trio.run()' )
         trio.run( self.call_urls, bibnum )
 
-
-
-
     async def call_urls( self, bibnum ):
         """ Triggers hitting urls concurrently.
-            Called by views.v2_bib_items_async() """
-        log.debug( 'starting manage_data_calls()' )
+            Called by manage_data_calls() """
+        log.debug( 'starting call_urls()' )
         start_time = time.time()
         results_holder_dct = {}  # receives fetch() responses as they're produced
+        log.debug( 'round ONE async calls about to commence' )
         async with trio.open_nursery() as nursery:
             nursery.start_soon( self.fetch_sierra_token, results_holder_dct )
-            # nursery.start_soon( self.fetch_945_data, bibnum, results_holder_dct )
-        # async with trio.open_nursery() as nursery:
-        #     nursery.start_soon( self.fetch_sierra_bib_data, results_holder_dct )
-        #     nursery.start_soon( self.fetch_sierra_item_data, results_holder_dct )
+            nursery.start_soon( self.fetch_945_data, bibnum, results_holder_dct )
+        log.debug( 'round TWO async calls about to commence' )
+        async with trio.open_nursery() as nursery:
+            nursery.start_soon( self.fetch_sierra_bib_data, bibnum, results_holder_dct )
+            nursery.start_soon( self.fetch_sierra_item_data, bibnum, results_holder_dct )
         log.debug( f'results_holder_dct, ```{pprint.pformat(results_holder_dct)}```' )
         self.total_time_taken = str( time.time() - start_time )
         log.debug( f'total time: taken ```{self.total_time_taken}```' )
@@ -64,14 +64,16 @@ class BibItemsInfoAsync:
         return
 
 
+
+
     async def fetch_sierra_token( self, results_holder_dct ):
         """ Returns auth-token for later sierra calls.
-            Called by manage_data_calls() """
+            Called by call_urls() """
         log.debug( 'starting fetch_sierra_token()' )
         log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         try:
-            response = await asks.post( 'https://httpbin.org/delay/.3', timeout=2 )
+            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
             status_code = response.status_code
         except Exception as e:
             status_code = repr(e)
@@ -79,11 +81,62 @@ class BibItemsInfoAsync:
         fetch_time_taken = str( time.time() - fetch_start_time )
         holder_result_dct = { 'sierra_token_value': status_code, 'time_taken': fetch_time_taken }
         log.debug( f'finished: holder_result_dct, ```{holder_result_dct}```' )
-        results_holder_dct['sierra_token_data'] = holder_result_dct
+        results_holder_dct['sierra_token_results'] = holder_result_dct
         return
 
+    async def fetch_945_data( self, bibnum, results_holder_dct ):
+        """ Returns auth-token for later sierra calls.
+            Called by call_urls() """
+        log.debug( 'starting fetch_945_data()' )
+        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        fetch_start_time = time.time()
+        try:
+            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
+            status_code = response.status_code
+        except Exception as e:
+            status_code = repr(e)
+            log.exception( '`get` failed; traceback follows; processing will continue' )
+        fetch_time_taken = str( time.time() - fetch_start_time )
+        holder_result_dct = { 'josiah_945_data': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'finished: holder_result_dct, ```{holder_result_dct}```' )
+        results_holder_dct['josiah_945_results'] = holder_result_dct
+        return
 
+    async def fetch_sierra_item_data( self, bibnum, results_holder_dct ):
+        """ Returns auth-token for later sierra calls.
+            Called by call_urls() """
+        log.debug( 'starting fetch_sierra_item_data()' )
+        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        fetch_start_time = time.time()
+        try:
+            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
+            status_code = response.status_code
+        except Exception as e:
+            status_code = repr(e)
+            log.exception( '`get` failed; traceback follows; processing will continue' )
+        fetch_time_taken = str( time.time() - fetch_start_time )
+        holder_result_dct = { 'sierra_item_data': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'finished: holder_result_dct, ```{holder_result_dct}```' )
+        results_holder_dct['sierra_item_results'] = holder_result_dct
+        return
 
+    async def fetch_sierra_bib_data( self, bibnum, results_holder_dct ):
+        """ Returns auth-token for later sierra calls.
+            Called by call_urls() """
+        log.debug( 'starting fetch_sierra_bib_data()' )
+        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        fetch_start_time = time.time()
+        try:
+            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
+            status_code = response.status_code
+        except Exception as e:
+            status_code = repr(e)
+            log.exception( '`get` failed; traceback follows; processing will continue' )
+        fetch_time_taken = str( time.time() - fetch_start_time )
+        holder_result_dct = { 'sierra_bib_data': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'finished: holder_result_dct, ```{holder_result_dct}```' )
+        results_holder_dct['sierra_bib_results'] = holder_result_dct
+        return
 
 
 
