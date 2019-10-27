@@ -179,7 +179,7 @@ class BibItemsInfo:
     #     return
 
     def get_945_item_id_list( self, bib ):
-        """ Not yet used; experimental. """
+        """ Grabs 945 list data for later sorting of bib-items. """
         item_ids = []
         url = f'https://search.library.brown.edu/catalog/{bib}.json'
         r = requests.get( url )
