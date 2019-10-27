@@ -12,36 +12,14 @@ from django.conf import settings as project_settings
 log = logging.getLogger(__name__)
 
 
-class BibItemsInfoAsync:
+class DataFetcher:
+    """ Manages multiple api requests.
+        Called by BibItemsInfoAsync.manage_data_calls() """
 
-    def __init__(self):
-        log.debug( 'initializing BibItemsInfoAsync instance' )
+    def __init__( self, bibnum ):
+        self.bibnum = bibnum
         self.results_dct = {}
         self.total_time_taken = None
-        self.bibnum = ''
-
-    def build_query_dct( self, request, rq_now ):
-        """ Builds query-dct part of response.
-            Called by: views.v2_bib_items_async()
-            TODO: merge with other identical methods() """
-        query_dct = {
-            'url': '%s://%s%s' % ( request.scheme,
-                request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
-                request.META.get('REQUEST_URI', request.META['PATH_INFO'])
-                ),
-            'timestamp': str( rq_now ) }
-        # self.build_stats_dct(
-        #     query_dct['url'], request.META.get('HTTP_REFERER', None), request.META.get('HTTP_USER_AGENT', None), request.META.get('REMOTE_ADDR', None) )
-        log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
-        return query_dct
-
-    def manage_data_calls( self, bibnum ):
-        """ Initiates async manager.
-            Called by views.v2_bib_items_async()
-            (Bridge between sync and async.) """
-        log.debug( 'about to call trio.run()' )
-        self.bibnum = bibnum
-        trio.run( self.call_urls )
 
     async def call_urls( self ):
         """ Triggers hitting urls concurrently.
@@ -133,6 +111,44 @@ class BibItemsInfoAsync:
         holder_result_dct = { 'sierra_item_data': status_code, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: holder_result_dct, ```{holder_result_dct}```' )
         results_holder_dct['sierra_item_results'] = holder_result_dct
+        return
+
+    ## end class DataFetcher
+
+
+class BibItemsInfoAsync:
+
+    def __init__( self ):
+        log.debug( 'initializing BibItemsInfoAsync instance' )
+        self.results_dct = {}
+        self.total_time_taken = None
+        self.bibnum = ''
+
+    def build_query_dct( self, request, rq_now ):
+        """ Builds query-dct part of response.
+            Called by: views.v2_bib_items_async()
+            TODO: merge with other identical methods() """
+        query_dct = {
+            'url': '%s://%s%s' % ( request.scheme,
+                request.META.get( 'HTTP_HOST', '127.0.0.1' ),  # HTTP_HOST doesn't exist for client-tests
+                request.META.get('REQUEST_URI', request.META['PATH_INFO'])
+                ),
+            'timestamp': str( rq_now ) }
+        # self.build_stats_dct(
+        #     query_dct['url'], request.META.get('HTTP_REFERER', None), request.META.get('HTTP_USER_AGENT', None), request.META.get('REMOTE_ADDR', None) )
+        log.debug( 'query_dct, ```%s``' % pprint.pformat(query_dct) )
+        return query_dct
+
+    def manage_data_calls( self, bibnum ):
+        """ Initiates async manager.
+            Called by views.v2_bib_items_async()
+            (Bridge between sync and async.) """
+        log.debug( 'about to call trio.run()' )
+        fetcher = DataFetcher( bibnum )
+        self.bibnum = 'FOO'  # remove if not needed
+        trio.run( fetcher.call_urls )
+        self.results_dct = fetcher.results_dct
+        log.debug( f'results_dct, ```{pprint.pformat(self.results_dct)}```' )
         return
 
     def prep_data( self, data_dct, host ):
