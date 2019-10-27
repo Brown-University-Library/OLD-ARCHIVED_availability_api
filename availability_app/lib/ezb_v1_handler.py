@@ -19,7 +19,7 @@ class EzbV1Helper( object ):
     """ Helper for v1 api route. """
 
     def __init__( self ):
-        log.debug( 'initializing helper' )
+        log.debug( 'initializing EzbV1Helper instance' )
         # self.legit_services = [ 'isbn', 'oclc' ]
         self.legit_services = [ 'bib', 'isbn', 'oclc' ]
         self.parser = Parser()
