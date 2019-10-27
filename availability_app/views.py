@@ -4,9 +4,10 @@ import datetime, json, logging, os, pprint
 
 from availability_app import settings_app
 from availability_app.lib import view_info_helper
+from availability_app.lib.concurrency import AsyncHelper  # temporary demo helper
 from availability_app.lib.ezb_v1_handler import EzbV1Helper
 from availability_app.lib.bib_items_v2 import BibItemsInfo
-from availability_app.lib.bib_items_async_v2 import BibItemsInfoAsync
+from availability_app.lib.bib_items_async_v2 import BibItemsInfoAsync  # not yet in production
 from availability_app.lib.stats_v1_handler import StatsValidator, StatsBuilder
 from django.conf import settings as project_settings
 from django.contrib.auth import logout
@@ -21,7 +22,6 @@ ezb1_helper = EzbV1Helper()
 stats_builder = StatsBuilder()
 stats_validator = StatsValidator()
 bib_items = BibItemsInfo()
-bib_items_async = bitems_async = BibItemsInfoAsync()
 
 
 # ===========================
@@ -31,7 +31,6 @@ bib_items_async = bitems_async = BibItemsInfoAsync()
 
 def concurrency_test( request ):
     """ Tests concurrency, via trio, with django. """
-    from availability_app.lib.concurrency import AsyncHelper
     if project_settings.DEBUG == False:  # only active on dev-server
         return HttpResponseNotFound( '<div>404 / Not Found</div>' )
     async_hlpr = AsyncHelper()
@@ -50,15 +49,20 @@ def concurrency_test( request ):
 
 
 def v2_bib_items_async( request, bib_value ):
-    """ Not currently used; non-async version in production used by easyrequest_hay. """
+    """ Not currently used; non-async version in production is used by easyrequest_hay. """
+    if project_settings.DEBUG == False:  # only active on dev-server
+        return HttpResponseNotFound( '<div>404 / Not Found</div>' )
+    bib_items_async = bitems_async = BibItemsInfoAsync()
     # log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
     log.debug( f'starting... request.__dict__, ```{request.__dict__}```' )
+    log.debug( f'starting bib_items_async.bibnum, `{bib_items_async.bibnum}`' )
     start_stamp = datetime.datetime.now()
     query_dct = bitems_async.build_query_dct( request, start_stamp )
     raw_data_dct = bitems_async.manage_data_calls( bib_value )
     host = request.META.get( 'HTTP_HOST', '127.0.0.1' )
     data_dct = bitems_async.prep_data( raw_data_dct, host )
     response_dct = bitems_async.build_response_dct( data_dct, start_stamp )
+    log.debug( f'ending bib_items_async.bibnum, `{bib_items_async.bibnum}`' )
     jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
     return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
