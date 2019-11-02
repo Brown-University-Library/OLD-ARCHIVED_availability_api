@@ -43,16 +43,36 @@ class DataFetcher:
         log.debug( 'starting fetch_945_data()' )
         log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
+        item_ids = []
         try:
-            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
-            status_code = response.status_code
+            url = f'https://search.library.brown.edu/catalog/{self.bibnum}.json'
+            rsp = await asks.get( url, timeout=2 )
+            self.process_945_data( rsp, item_ids )
         except Exception as e:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        holder_result_dct = { 'josiah_945_data': status_code, 'time_taken': fetch_time_taken }
-        log.debug( f'fetch finished: holder_result_dct, ```{holder_result_dct}```' )
-        results_holder_dct['josiah_945_results'] = holder_result_dct
+        fetch_holder_dct = { 'josiah_945_lst': item_ids, 'time_taken': fetch_time_taken }
+        log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
+        results_holder_dct['josiah_945_results'] = fetch_holder_dct
+        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
+        return
+
+    def process_945_data( self, rsp, item_ids ):
+        """ Extracts 945 items from response.
+            Called by fetch_945_data() """
+        dct = rsp.json()
+        marc_string = dct['response']['document']['marc_display']
+        marc_dct = json.loads( marc_string )
+        for field_dct in marc_dct['fields']:
+            ( key, value_dct ) = list( field_dct.items() )[0]
+            if key == '945':
+                for subfield_dct in value_dct['subfields']:
+                    ( key2, value2 ) = list( subfield_dct.items() )[0]
+                    if key2 == 'y':
+                        item_ids.append( value2[2:-1] )  # raw value2 is like '.i159930728' -- this drops the '.i' and the check-digit
+                        break
+        log.debug( f'item_ids, ```{item_ids}```' )
         return
 
     async def fetch_sierra_token( self, results_holder_dct ):
@@ -68,9 +88,10 @@ class DataFetcher:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        holder_result_dct = { 'sierra_token_value': status_code, 'time_taken': fetch_time_taken }
-        log.debug( f'fetch finished: holder_result_dct, ```{holder_result_dct}```' )
-        results_holder_dct['sierra_token_results'] = holder_result_dct
+        fetch_holder_dct = { 'sierra_token_value': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
+        results_holder_dct['sierra_token_results'] = fetch_holder_dct
+        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         log.debug( 'round TWO async calls about to commence' )
         async with trio.open_nursery() as nursery:
             nursery.start_soon( self.fetch_sierra_bib_data, results_holder_dct )
@@ -90,9 +111,10 @@ class DataFetcher:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        holder_result_dct = { 'sierra_bib_data': status_code, 'time_taken': fetch_time_taken }
-        log.debug( f'fetch finished: holder_result_dct, ```{holder_result_dct}```' )
-        results_holder_dct['sierra_bib_results'] = holder_result_dct
+        fetch_holder_dct = { 'sierra_bib_data': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
+        results_holder_dct['sierra_bib_results'] = fetch_holder_dct
+        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         return
 
     async def fetch_sierra_item_data( self, results_holder_dct ):
@@ -108,9 +130,10 @@ class DataFetcher:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        holder_result_dct = { 'sierra_item_data': status_code, 'time_taken': fetch_time_taken }
-        log.debug( f'fetch finished: holder_result_dct, ```{holder_result_dct}```' )
-        results_holder_dct['sierra_item_results'] = holder_result_dct
+        fetch_holder_dct = { 'sierra_item_data': status_code, 'time_taken': fetch_time_taken }
+        log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
+        results_holder_dct['sierra_item_results'] = fetch_holder_dct
+        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         return
 
     ## end class DataFetcher
@@ -148,7 +171,7 @@ class BibItemsInfoAsync:
         self.bibnum = 'FOO'  # remove if not needed
         trio.run( fetcher.call_urls )
         self.results_dct = fetcher.results_dct
-        log.debug( f'results_dct, ```{pprint.pformat(self.results_dct)}```' )
+        # log.debug( f'results_dct, ```{pprint.pformat(self.results_dct)}```' )
         return
 
     def prep_data( self, data_dct, host ):
