@@ -211,7 +211,7 @@ class BibItemsInfoAsync:
         summarized_item_lst = self.summarize_item_data( raw_data_dct['sierra_item_results'], raw_data_dct['josiah_945_results'] )
         response_dct = { 'bib': summarized_bib_dct, 'items': summarized_item_lst, 'items_count': len(summarized_item_lst) }
         if project_settings.DEBUG == True and host[0:9] == '127.0.0.1':  # useful for development
-            response_dct['sierra-bibitems-api'] = raw_data_dct['sierra_item_results']
+            response_dct['sierra-bibitems-api'] = raw_data_dct['sierra_item_results']['sierra_item_data']
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
@@ -219,7 +219,7 @@ class BibItemsInfoAsync:
         """ Extracts essential data from sierra-api bib data.
             Called by prep_data() """
         try:
-            entry = raw_bib_data['entries'][0]
+            entry = raw_bib_data['sierra_bib_data']['entries'][0]
             title = entry['title']
             if title[-1] == ',':
                 title = title[0:-1]
