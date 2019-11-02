@@ -82,8 +82,9 @@ class DataFetcher:
         log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         try:
-            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
-            status_code = response.status_code
+            sierra = SierraAsyncConnector()  # instantiated here to get fresh token
+            # response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
+            # status_code = response.status_code
         except Exception as e:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
