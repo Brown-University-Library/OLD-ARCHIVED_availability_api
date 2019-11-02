@@ -53,7 +53,6 @@ def v2_bib_items_async( request, bib_value ):
     if project_settings.DEBUG == False:  # only active on dev-server
         return HttpResponseNotFound( '<div>404 / Not Found</div>' )
     bib_items_async = bitems_async = BibItemsInfoAsync()
-    # log.debug( f'starting... request.__dict__, ```{pprint.pformat(request.__dict__)}```' )
     log.debug( f'starting... request.__dict__, ```{request.__dict__}```' )
     start_stamp = datetime.datetime.now()
     query_dct = bitems_async.build_query_dct( request, start_stamp )

@@ -198,31 +198,22 @@ class BibItemsInfoAsync:
         fetcher = DataFetcher( bibnum )
         self.bibnum = 'FOO'  # remove if not needed
         trio.run( fetcher.call_urls )
-        self.results_dct = fetcher.results_dct
-        # log.debug( f'results_dct, ```{pprint.pformat(self.results_dct)}```' )
-        return
+        # self.results_dct = fetcher.results_dct
+        fetched_data = fetcher.results_dct
+        log.debug( f'results_dct, see recent DataFetcher.call_urls() log-entry' )
+        return fetched_data
 
-    def prep_data( self, data_dct, host ):
+    def prep_data( self, raw_data_dct, host ):
         """ Extracts data for response.
             Called by views.v2_bib_items_async() """
-        response_dct = { 'data': 'coming' }
+        log.debug( f'raw_data_dct.keys(), ```{sorted( raw_data_dct.keys() )}```' )
+        summarized_bib_dct = self.summarize_bib_data( raw_data_dct['sierra_bib_results'] )
+        summarized_item_lst = self.summarize_item_data( raw_data_dct['sierra_item_results'], raw_data_dct['josiah_945_results'] )
+        response_dct = { 'bib': summarized_bib_dct, 'items': summarized_item_lst, 'items_count': len(summarized_item_lst) }
+        if project_settings.DEBUG == True and host[0:9] == '127.0.0.1':  # useful for development
+            response_dct['sierra-bibitems-api'] = raw_data_dct['sierra_item_results']
+        log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
-
-    # def prep_data( self, bibnum, host ):
-    #     """ Grabs and processes data from Sierra.
-    #         Called by: views.v2_bib() """
-    #     sierra = SierraConnector()  # instantiated here to get fresh token
-    #     raw_items_data = sierra.get_bib_items_info( bibnum[1:] )  # removes the 'b' of the bib-number
-    #     items = self.summarize_item_data( raw_items_data, bibnum )
-    #     raw_bib_data = sierra.get_bib_info( bibnum[1:] )
-    #     bib_dct = self.summarize_bib_data( raw_bib_data )
-    #     # response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
-    #     response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items) }
-    #     if project_settings.DEBUG == True and host[0:9] == '127.0.0.1':  # useful for development
-    #         response_dct['sierra-api'] = raw_items_data
-    #         response_dct['sierra_api_query'] = sierra.url
-    #     log.debug( f'response_dct, ```{response_dct}```' )
-    #     return response_dct
 
     def summarize_bib_data( self, raw_bib_data ):
         """ Extracts essential data from sierra-api bib data.
@@ -239,12 +230,12 @@ class BibItemsInfoAsync:
         log.debug( f'bib_dct, ```{bib_dct}```' )
         return bib_dct
 
-    def summarize_item_data( self, raw_items_data, bib ):
+    def summarize_item_data( self, sierra_item_results, josiah_945_data ):
         """ Extracts essential data from sierra-api items data.
             Called by prep_data() """
         items = []
-        initial_entries = raw_items_data['entries']  # initial_entries is a list of dicts
-        sorted_entries = self.sort_entries( initial_entries, bib )
+        initial_entries = sierra_item_results['sierra_item_data']['entries']  # initial_entries is a list of dicts
+        sorted_entries = self.sort_entries( initial_entries, josiah_945_data )
         for entry in sorted_entries:
             item_dct = {
                 'barcode': entry['barcode'].replace( ' ', '' ),
@@ -258,10 +249,11 @@ class BibItemsInfoAsync:
         log.debug( f'items, ```{pprint.pformat(items)}```' )
         return items
 
-    def sort_entries( self, initial_entries, bib ):
+    def sort_entries( self, initial_entries, josiah_945_data ):
         """ Gets the 945 order, and sorts entries according to that order.
             Called by summarize_item_data() """
-        ordered_945_item_ids = self.get_945_item_id_list( bib )
+        # ordered_945_item_ids = self.get_945_item_id_list( bib )
+        ordered_945_item_ids = josiah_945_data['josiah_945_lst']
         order_dct = { order_945: index for index, order_945 in enumerate(ordered_945_item_ids) }
         log.debug( f'order_dct, ```{pprint.pformat(order_dct)}```' )
         sorted_entries = sorted( initial_entries, key=lambda x: order_dct[x['id']] )
