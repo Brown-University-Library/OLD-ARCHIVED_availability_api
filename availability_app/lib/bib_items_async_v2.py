@@ -5,7 +5,9 @@ Helper for views.v2_bib()
 import datetime, json, logging, operator, os, pprint, time
 
 import asks, requests, trio
-from availability_app.lib.sierra_api import SierraConnector
+from asks import BasicAuth as asksBasicAuth
+from availability_app import settings_app
+from availability_app.lib.sierra_api import SierraAsyncConnector
 from django.conf import settings as project_settings
 
 
@@ -81,44 +83,74 @@ class DataFetcher:
         log.debug( 'starting fetch_sierra_token()' )
         log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
+        auth_token = {}
         try:
-            sierra = SierraAsyncConnector()  # instantiated here to get fresh token
+            # sierra = SierraAsyncConnector()  # instantiated here to get fresh token
             # response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
             # status_code = response.status_code
+            token_url = f'{settings_app.SIERRA_API_ROOT_URL}/token'
+            log.debug( 'token_url, ```%s```' % token_url )
+            # asksBasicAuth -- <https://asks.readthedocs.io/en/latest/overview-of-funcs-and-args.html#authing>
+            usr_pw = ( settings_app.SIERRA_API_HTTPBASIC_USERNAME, settings_app.SIERRA_API_HTTPBASIC_PASSWORD )
+            rsp = await asks.post(
+                token_url,
+                auth=asksBasicAuth( usr_pw ),
+                timeout=10 )
+            log.debug( f'token rsp.content, ```{rsp.content}```' )
+            auth_token = rsp.json()['access_token']
+            log.debug( f'auth_token, ```{auth_token}```' )
         except Exception as e:
-            status_code = repr(e)
-            log.exception( '`get` failed; traceback follows; processing will continue' )
+            log.exception( 'accessing token failed; traceback follows...' )
+            raise Exception( 'exception getting token' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        fetch_holder_dct = { 'sierra_token_value': status_code, 'time_taken': fetch_time_taken }
+        fetch_holder_dct = { 'sierra_token_value': auth_token, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['sierra_token_results'] = fetch_holder_dct
         log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         log.debug( 'round TWO async calls about to commence' )
         async with trio.open_nursery() as nursery:
-            nursery.start_soon( self.fetch_sierra_bib_data, results_holder_dct )
-            nursery.start_soon( self.fetch_sierra_item_data, results_holder_dct )
+            nursery.start_soon( self.fetch_sierra_bib_data, auth_token, results_holder_dct )
+            nursery.start_soon( self.fetch_sierra_item_data, auth_token, results_holder_dct )
         return
 
-    async def fetch_sierra_bib_data( self, results_holder_dct ):
+    async def fetch_sierra_bib_data( self, auth_token, results_holder_dct ):
         """ Returns auth-token for later sierra calls.
             Called by fetch_sierra_token() """
         log.debug( 'starting fetch_sierra_bib_data()' )
         log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
+        bib_dct = {}
         try:
-            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
-            status_code = response.status_code
+            # response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
+            # status_code = response.status_code
+            sliced_bib = self.bibnum[1:]  # removes initial 'b'
+            url = f'{settings_app.SIERRA_API_ROOT_URL}/bibs/?id={sliced_bib}'
+            custom_headers = {'Authorization': f'Bearer {auth_token}' }
+            rsp = await asks.get( url, headers=custom_headers, timeout=10 )
+            log.debug( f'rsp.status_code, `{rsp.status_code}`; ```{rsp.url}```; rsp.content, ```{rsp.content}```' )
+            bib_dct = rsp.json()
+
+            # url = f'{settings_app.SIERRA_API_ROOT_URL}/items'
+            # custom_headers = {'Authorization': f'Bearer {self.token}' }
+            # payload = {
+            #     'bibIds': f'{sliced_bib}',
+            #     'fields': 'default,varFields,fixedFields',
+            #     'deleted': 'false', 'suppressed': 'false', 'limit': '300' }
+            # rsp = await asks.get( url, headers=custom_headers, params=payload, timeout=10 )
+            # raw_items_dct = rsp.json()
+            # log.debug( f'rsp.status_code, `{rsp.status_code}`; ```{rsp.url}```; rsp.content, ```{rsp.content}```' )
+
         except Exception as e:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        fetch_holder_dct = { 'sierra_bib_data': status_code, 'time_taken': fetch_time_taken }
+        fetch_holder_dct = { 'sierra_bib_data': bib_dct, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['sierra_bib_results'] = fetch_holder_dct
         log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         return
 
-    async def fetch_sierra_item_data( self, results_holder_dct ):
+    async def fetch_sierra_item_data( self, auth_token, results_holder_dct ):
         """ Returns auth-token for later sierra calls.
             Called by fetch_sierra_token() """
         log.debug( 'starting fetch_sierra_item_data()' )

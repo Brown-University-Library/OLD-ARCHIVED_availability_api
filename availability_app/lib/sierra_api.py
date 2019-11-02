@@ -83,7 +83,7 @@ class SierraAsyncConnector():
     def __init__( self ):
         self.token = self.get_token()
 
-    def async get_token( self ):
+    async def get_token( self ):
         """ Gets API token.
             Called by controller.download_file() """
         token = 'init'
@@ -91,7 +91,7 @@ class SierraAsyncConnector():
         log.debug( 'token_url, ```%s```' % token_url )
         try:  # asksBasicAuth -- <https://asks.readthedocs.io/en/latest/overview-of-funcs-and-args.html#authing>
             usr_pw = ( settings_app.SIERRA_API_HTTPBASIC_USERNAME, settings_app.SIERRA_API_HTTPBASIC_PASSWORD )
-            rsp = asks.post(
+            rsp = await asks.post(
                 token_url,
                 auth=asksBasicAuth( usr_pw ),
                 timeout=10 )
