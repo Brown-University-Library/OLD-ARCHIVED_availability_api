@@ -121,25 +121,12 @@ class DataFetcher:
         fetch_start_time = time.time()
         bib_dct = {}
         try:
-            # response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
-            # status_code = response.status_code
             sliced_bib = self.bibnum[1:]  # removes initial 'b'
             url = f'{settings_app.SIERRA_API_ROOT_URL}/bibs/?id={sliced_bib}'
             custom_headers = {'Authorization': f'Bearer {auth_token}' }
             rsp = await asks.get( url, headers=custom_headers, timeout=10 )
             log.debug( f'rsp.status_code, `{rsp.status_code}`; ```{rsp.url}```; rsp.content, ```{rsp.content}```' )
             bib_dct = rsp.json()
-
-            # url = f'{settings_app.SIERRA_API_ROOT_URL}/items'
-            # custom_headers = {'Authorization': f'Bearer {self.token}' }
-            # payload = {
-            #     'bibIds': f'{sliced_bib}',
-            #     'fields': 'default,varFields,fixedFields',
-            #     'deleted': 'false', 'suppressed': 'false', 'limit': '300' }
-            # rsp = await asks.get( url, headers=custom_headers, params=payload, timeout=10 )
-            # raw_items_dct = rsp.json()
-            # log.debug( f'rsp.status_code, `{rsp.status_code}`; ```{rsp.url}```; rsp.content, ```{rsp.content}```' )
-
         except Exception as e:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
@@ -157,13 +144,21 @@ class DataFetcher:
         log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         try:
-            response = await asks.post( 'https://httpbin.org/delay/.2', timeout=2 )
-            status_code = response.status_code
+            sliced_bib = self.bibnum[1:]  # removes initial 'b'
+            url = f'{settings_app.SIERRA_API_ROOT_URL}/items'
+            custom_headers = {'Authorization': f'Bearer {auth_token}' }
+            payload = {
+                'bibIds': f'{sliced_bib}',
+                'fields': 'default,varFields,fixedFields',
+                'deleted': 'false', 'suppressed': 'false', 'limit': '300' }
+            rsp = await asks.get( url, headers=custom_headers, params=payload, timeout=10 )
+            raw_items_dct = rsp.json()
+            log.debug( f'rsp.status_code, `{rsp.status_code}`; ```{rsp.url}```; rsp.content, ```{rsp.content}```' )
         except Exception as e:
             status_code = repr(e)
             log.exception( '`get` failed; traceback follows; processing will continue' )
         fetch_time_taken = str( time.time() - fetch_start_time )
-        fetch_holder_dct = { 'sierra_item_data': status_code, 'time_taken': fetch_time_taken }
+        fetch_holder_dct = { 'sierra_item_data': raw_items_dct, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['sierra_item_results'] = fetch_holder_dct
         log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
