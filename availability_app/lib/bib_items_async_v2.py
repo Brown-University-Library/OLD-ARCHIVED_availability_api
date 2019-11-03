@@ -43,7 +43,7 @@ class DataFetcher:
         """ Obtains 945 data for sorting items.
             Called by call_urls() """
         log.debug( 'starting fetch_945_data()' )
-        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         item_ids = []
         try:
@@ -57,7 +57,7 @@ class DataFetcher:
         fetch_holder_dct = { 'josiah_945_lst': item_ids, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['josiah_945_results'] = fetch_holder_dct
-        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         return
 
     def process_945_data( self, rsp, item_ids ):
@@ -81,7 +81,7 @@ class DataFetcher:
         """ Obtains auth-token for later sierra calls.
             Called by call_urls() """
         log.debug( 'starting fetch_sierra_token()' )
-        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         auth_token = {}
         try:
@@ -106,7 +106,7 @@ class DataFetcher:
         fetch_holder_dct = { 'sierra_token_value': auth_token, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['sierra_token_results'] = fetch_holder_dct
-        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         log.debug( 'round TWO async calls about to commence' )
         async with trio.open_nursery() as nursery:
             nursery.start_soon( self.fetch_sierra_bib_data, auth_token, results_holder_dct )
@@ -117,7 +117,7 @@ class DataFetcher:
         """ Returns auth-token for later sierra calls.
             Called by fetch_sierra_token() """
         log.debug( 'starting fetch_sierra_bib_data()' )
-        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         bib_dct = {}
         try:
@@ -134,14 +134,14 @@ class DataFetcher:
         fetch_holder_dct = { 'sierra_bib_data': bib_dct, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['sierra_bib_results'] = fetch_holder_dct
-        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         return
 
     async def fetch_sierra_item_data( self, auth_token, results_holder_dct ):
         """ Returns auth-token for later sierra calls.
             Called by fetch_sierra_token() """
         log.debug( 'starting fetch_sierra_item_data()' )
-        log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'initial results_holder_dct, ```{results_holder_dct}```' )
         fetch_start_time = time.time()
         try:
             sliced_bib = self.bibnum[1:]  # removes initial 'b'
@@ -161,7 +161,7 @@ class DataFetcher:
         fetch_holder_dct = { 'sierra_item_data': raw_items_dct, 'time_taken': fetch_time_taken }
         log.debug( f'fetch finished: fetch_holder_dct, ```{fetch_holder_dct}```' )
         results_holder_dct['sierra_item_results'] = fetch_holder_dct
-        log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
+        # log.debug( f'fetch finished: results_holder_dct, ```{results_holder_dct}```' )
         return
 
     ## end class DataFetcher
