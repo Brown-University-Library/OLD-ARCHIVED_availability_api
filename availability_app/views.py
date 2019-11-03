@@ -50,8 +50,8 @@ def concurrency_test( request ):
 
 def v2_bib_items_async( request, bib_value ):
     """ Not currently used; non-async version in production is used by easyrequest_hay. """
-    if project_settings.DEBUG == False:  # only active on dev-server
-        return HttpResponseNotFound( '<div>404 / Not Found</div>' )
+    # if project_settings.DEBUG == False:  # only active on dev-server
+    #     return HttpResponseNotFound( '<div>404 / Not Found</div>' )
     bib_items_async = bitems_async = BibItemsInfoAsync()
     log.debug( f'starting... request.__dict__, ```{request.__dict__}```' )
     start_stamp = datetime.datetime.now()
