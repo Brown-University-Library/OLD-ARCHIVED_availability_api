@@ -1,5 +1,5 @@
 asks==2.3.6
-Django==1.11.28
+Django==1.11.29
 isbnlib==3.9.2
 ply==3.11
 pymarc==3.1.10
