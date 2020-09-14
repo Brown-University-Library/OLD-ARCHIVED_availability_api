@@ -92,9 +92,17 @@ def v2_bib_items( request, bib_value ):
     query_dct = bib_items.build_query_dct( request, start_stamp )
     host = request.META.get( 'HTTP_HOST', '127.0.0.1' )
     data_dct = bib_items.prep_data( bib_value, host )
-    response_dct = bib_items.build_response_dct( data_dct, start_stamp )
-    jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
-    return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
+    ## TODO- refactor this quick-handling of a bad sierra response
+    response_dct = {}
+    if 'httpStatus' in data_dct.keys():
+        if data_dct['httpStatus'] != 200:
+            response_dct = { 'problem_sierra_response': data_dct }
+            jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
+            return HttpResponseNotFound( jsn, content_type='application/javascript; charset=utf-8' )
+    else:
+        response_dct = bib_items.build_response_dct( data_dct, start_stamp )
+        jsn = json.dumps( { 'query': query_dct, 'response': response_dct }, sort_keys=True, indent=2 )
+        return HttpResponse( jsn, content_type='application/javascript; charset=utf-8' )
 
 
 def ezb_v1_stats( request ):

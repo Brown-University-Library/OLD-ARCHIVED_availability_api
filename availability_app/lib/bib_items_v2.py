@@ -31,17 +31,23 @@ class BibItemsInfo:
 
     def prep_data( self, bibnum, host ):
         """ Grabs and processes data from Sierra.
-            Called by: views.v2_bib() """
+            Called by: views.v2_bib_items() """
         sierra = SierraConnector()  # instantiated here to get fresh token
         raw_items_data = sierra.get_bib_items_info( bibnum[1:] )  # removes the 'b' of the bib-number
-        items = self.summarize_item_data( raw_items_data, bibnum )
-        raw_bib_data = sierra.get_bib_info( bibnum[1:] )
-        bib_dct = self.summarize_bib_data( raw_bib_data )
-        # response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
-        response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items) }
-        if project_settings.DEBUG == True and host[0:9] == '127.0.0.1':  # useful for development
-            response_dct['sierra-api'] = raw_items_data
-            response_dct['sierra_api_query'] = sierra.url
+        log.debug( f'raw_items_data, ``{pprint.pformat(raw_items_data)}``' )
+        if 'httpStatus' in raw_items_data.keys():
+            if raw_items_data['httpStatus'] != 200:
+                log.warning( 'problem with sierra response' )
+                response_dct = raw_items_data
+        else:
+            items = self.summarize_item_data( raw_items_data, bibnum )
+            raw_bib_data = sierra.get_bib_info( bibnum[1:] )
+            bib_dct = self.summarize_bib_data( raw_bib_data )
+            # response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items), 'sierra_api': raw_items_data, 'sierra_api_query': sierra.url }
+            response_dct = { 'bib': bib_dct, 'items': items, 'items_count': len(items) }
+            if project_settings.DEBUG == True and host[0:9] == '127.0.0.1':  # useful for development
+                response_dct['sierra-api'] = raw_items_data
+                response_dct['sierra_api_query'] = sierra.url
         log.debug( f'response_dct, ```{response_dct}```' )
         return response_dct
 
@@ -63,6 +69,7 @@ class BibItemsInfo:
     def summarize_item_data( self, raw_items_data, bib ):
         """ Extracts essential data from sierra-api items data.
             Called by prep_data() """
+        log.debug( f'raw_items_data, ``{raw_items_data}```' )
         items = []
         initial_entries = raw_items_data['entries']  # initial_entries is a list of dicts
         sorted_entries = self.sort_entries( initial_entries, bib )
